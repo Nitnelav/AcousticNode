@@ -58,7 +58,6 @@ public:
 private slots:
     void nodeSelected(Node &node);
     void selectionChanged();
-
 };
 
 #endif // MAINWINDOW_H

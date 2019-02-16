@@ -33,12 +33,12 @@ private:
     QList<float> values_;
     int type_;
 
-    QString descritpion_;
+    QString description_;
     QTableWidget* tableWidget_;
 
 public:
-    SpectrumData(int type, QString descritpion, float val_63 = -99.0, float val_125 = -99.0, float val_250 = -99.0, float val_500 = -99.0, float val_1k = -99.0, float val_2k = -99.0, float val_4k = -99.0, float val_8k = -99.0):
-        type_(type), descritpion_(descritpion)
+    SpectrumData(int type, QString description, float val_63 = -99.0, float val_125 = -99.0, float val_250 = -99.0, float val_500 = -99.0, float val_1k = -99.0, float val_2k = -99.0, float val_4k = -99.0, float val_8k = -99.0):
+        type_(type), description_(description)
     {
         values_.append(val_63);
         values_.append(val_125);
@@ -114,8 +114,11 @@ public:
         tableWidget_->item(0, freq)->setText(QString::number(value));
     }
 
-    QTableWidget* getTableWidget()
+    QTableWidget* getTableWidget() const
     { return tableWidget_; }
+
+    QString description() const
+    { return description_; }
 
 private Q_SLOTS:
 

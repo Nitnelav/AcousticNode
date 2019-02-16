@@ -59,11 +59,12 @@ private:
     QString validationMessage_;
 
     void setupParameters();
+    void setupOutputs();
     void calculate();
 
 public:
     ScriptWrapperModel(QJSEngine *engine, QString path);
-    ~ScriptWrapperModel() override;
+    virtual ~ScriptWrapperModel() override {}
 
     /// Caption is used in GUI
     QString caption() const override;
@@ -91,6 +92,8 @@ public:
     QString validationMessage() const override;
 
     QWidget * embeddedWidget() override { return nullptr; }
+
+    bool resizable() const override { return false; }
 
     int numInputs() const { return numInputs_; }
     int numParameters() const { return numParameters_; }

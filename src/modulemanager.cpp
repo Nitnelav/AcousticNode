@@ -50,10 +50,10 @@ std::shared_ptr<QtNodes::DataModelRegistry> ModuleManager::getModuleRegistry()
     auto ret = std::make_shared<DataModelRegistry>();
     QJSEngine* js = js_;
     foreach (QString path, validModules_) {
-        auto creator = [js, path]() mutable {
-            return std::unique_ptr<ScriptWrapperModel>(new ScriptWrapperModel(js, path));
+        auto creator = [js, path]() {
+            return std::make_unique<ScriptWrapperModel>(js, path);
         };
-        ret->registerModel<ScriptWrapperModel>(creator);
+        ret->registerModel<ScriptWrapperModel>(std::move(creator));
     }
     return ret;
 }
