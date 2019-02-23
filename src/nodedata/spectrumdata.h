@@ -16,29 +16,21 @@
 #define SPECTRUM_TYPE_LW 3
 #define SPECTRUM_TYPE_LP 4
 
-#include <QObject>
-#include <QTableWidget>
-#include <QHeaderView>
-
 #include <NodeDataModel>
 
 using QtNodes::NodeData;
 using QtNodes::NodeDataType;
 
-class SpectrumData : public QObject, public NodeData
+class SpectrumData : public NodeData
 {
-    Q_OBJECT
-
 private:
-    QList<float> values_;
+    QList<double> values_;
     int type_;
 
-    QString description_;
-    QTableWidget* tableWidget_;
-
 public:
-    SpectrumData(int type, QString description, float val_63 = -99.0, float val_125 = -99.0, float val_250 = -99.0, float val_500 = -99.0, float val_1k = -99.0, float val_2k = -99.0, float val_4k = -99.0, float val_8k = -99.0):
-        type_(type), description_(description)
+    SpectrumData(int type, double val_63 = 0., double val_125 = 0.0, double val_250 = 0.0, double val_500 = 0.0,
+                 double val_1k = 0.0, double val_2k = 0.0, double val_4k = 0.0, double val_8k = 0.0):
+        type_(type)
     {
         values_.append(val_63);
         values_.append(val_125);
@@ -48,23 +40,9 @@ public:
         values_.append(val_2k);
         values_.append(val_4k);
         values_.append(val_8k);
-
-        tableWidget_ = new QTableWidget(1, 8);
-        QStringList headers = QStringList() << "63Hz" << "125Hz" << "250Hz" << "500Hz" << "1kHz" << "2kHz" << "4kHz" << "8kHz";
-        tableWidget_->setHorizontalHeaderLabels(headers);
-        tableWidget_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-        tableWidget_->verticalHeader()->setStretchLastSection(true);
-        tableWidget_->verticalHeader()->hide();
-        tableWidget_->resizeColumnsToContents();
-        tableWidget_->setMaximumHeight(70);
-
-        for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; ++freq)
-        {
-            tableWidget_->setItem(0, freq, new QTableWidgetItem(QString::number(values_[freq])));
-        }
-
-        connect(tableWidget_, &QTableWidget::cellChanged, this, &SpectrumData::cellChanged);
     }
+
+    ~SpectrumData() override {}
 
     NodeDataType type() const override
     {
@@ -100,37 +78,17 @@ public:
                 "Unknown"
             };
         }
-
     }
 
-    float getValue(int freq) const
+    double getValue(int freq) const
     {
         return values_[freq];
     }
 
-    void setValue(int freq, float value)
+    void setValue(int freq, double value)
     {
         values_[freq] = value;
-        tableWidget_->item(0, freq)->setText(QString::number(value));
     }
-
-    QTableWidget* getTableWidget() const
-    { return tableWidget_; }
-
-    QString description() const
-    { return description_; }
-
-private Q_SLOTS:
-
-    void cellChanged(int row, int freq) {
-        float value = tableWidget_->item(row, freq)->text().toFloat();
-        values_[freq] = value;
-        Q_EMIT widgetDataChanged();
-    }
-
-Q_SIGNALS:
-
-    void widgetDataChanged();
 };
 
 #endif // SPECTRUMDATA_H

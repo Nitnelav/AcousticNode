@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui qml opengl
+QT       += core gui qml opengl charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -51,7 +51,10 @@ SOURCES += \
     externals/nodeeditor/src/NodeStyle.cpp \
     externals/nodeeditor/src/Properties.cpp \
     externals/nodeeditor/src/StyleCollection.cpp \
-    src/modulemanager.cpp
+    src/modulemanager.cpp \
+    src/modulegraph.cpp \
+    src/moduledata.cpp \
+    src/spectrummoduledata.cpp
 
 HEADERS += \
     src/mainwindow.h \
@@ -108,7 +111,10 @@ HEADERS += \
     src/nodedata/spectrumdata.h \
     src/nodedata/booleandata.h \
     src/nodedata/integerdata.h \
-    src/nodedata/floatdata.h
+    src/nodedata/floatdata.h \
+    src/modulegraph.h \
+    src/moduledata.h \
+    src/spectrummoduledata.h
 
 FORMS += \
         src/mainwindow.ui

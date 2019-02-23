@@ -3,10 +3,12 @@
 
 #include <QObject>
 #include <QWidget>
+#include <QLabel>
 #include <QException>
 #include <QJSEngine>
 #include <QJSValue>
 #include <QJSValueIterator>
+#include <QChartView>
 
 #include <NodeDataModel>
 #include <NodeData>
@@ -15,10 +17,9 @@
 #include <NodePainterDelegate>
 
 #include "moduleexceptions.h"
-#include "nodedata/spectrumdata.h"
-#include "nodedata/booleandata.h"
-#include "nodedata/integerdata.h"
-#include "nodedata/floatdata.h"
+#include "modulegraph.h"
+#include "moduledata.h"
+#include "spectrummoduledata.h"
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -36,13 +37,15 @@ private:
     QString path_;
     QJSValue module_;
 
-    QList<std::shared_ptr<NodeData> > inputs_;
-    QList<std::shared_ptr<NodeData> > parameters_;
-    QList<std::shared_ptr<NodeData> > outputs_;
+    QString caption_;
+    QString description_;
+    std::shared_ptr<QLabel> descriptionWidget_;
 
-    QList<QWidget*> inputWidgets_;
-    QList<QWidget*> parameterWidgets_;
-    QList<QWidget*> outputWidgets_;
+    QList<std::shared_ptr<ModuleData> > inputs_;
+    QList<std::shared_ptr<ModuleData> > parameters_;
+    QList<std::shared_ptr<ModuleData> > outputs_;
+
+    std::shared_ptr<ModuleGraph> moduleGraph_;
 
     QJSValue inputsDefinition_;
     int numInputs_;
@@ -58,16 +61,18 @@ private:
     NodeValidationState validationState_ = NodeValidationState::Valid;
     QString validationMessage_;
 
-    void setupParameters();
-    void setupOutputs();
     void calculate();
 
 public:
     ScriptWrapperModel(QJSEngine *engine, QString path);
-    virtual ~ScriptWrapperModel() override {}
+    virtual ~ScriptWrapperModel() {}
 
+    void setCaption(const QString& caption) { caption_ = caption; }
     /// Caption is used in GUI
     QString caption() const override;
+
+    void setDescription(const QString& description);
+    QString description() const { return description_; }
 
     /// Name makes this model unique
     QString name() const override;
@@ -91,17 +96,19 @@ public:
 
     QString validationMessage() const override;
 
-    QWidget * embeddedWidget() override { return nullptr; }
+    QWidget * embeddedWidget() override;
 
-    bool resizable() const override { return false; }
+    bool resizable() const override { return true; }
 
     int numInputs() const { return numInputs_; }
     int numParameters() const { return numParameters_; }
     int numOutputs() const { return numOutputs_; }
 
-    std::shared_ptr<NodeData> getInputData(int index) const;
-    std::shared_ptr<NodeData> getParameterData(int index) const;
-    std::shared_ptr<NodeData> getOutputData(int index) const;
+    std::shared_ptr<ModuleData> getInputData(int index) const;
+    std::shared_ptr<ModuleData> getParameterData(int index) const;
+    std::shared_ptr<ModuleData> getOutputData(int index) const;
+
+    ModuleGraph* getModuleGraph() const { return moduleGraph_.get(); }
 
 private slots:
 

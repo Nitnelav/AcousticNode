@@ -7,6 +7,7 @@
 #include <QMenuBar>
 #include <QFormLayout>
 #include <QDockWidget>
+#include <QtCharts/QChart>
 
 #include <Node>
 #include <NodeData>
@@ -17,6 +18,9 @@
 
 #include "scriptwrappermodel.h"
 #include "modulemanager.h"
+#include "modulegraph.h"
+
+using namespace QtCharts;
 
 using QtNodes::DataModelRegistry;
 using QtNodes::Node;
@@ -40,24 +44,40 @@ private:
     QJSEngine* js_;
     ModuleManager* moduleMgr_;
 
+    ScriptWrapperModel* selectedNode_;
+    ScriptWrapperModel* lockedNode_;
+
     FlowScene* flowScene_;
     QDockWidget* parameterDock_;
     QDockWidget* _bddDock;
     QDockWidget* _spectrumDock;
 
-    QFormLayout* parametersLayout_;
+    QFormLayout* leftInputsLayout_;
+    QFormLayout* leftParametersLayout_;
+    QFormLayout* leftOutputsLayout_;
 
-    QWidget* parameterWidget_;
-    QTabWidget* _bddWidget;
-    QWidget* _spectrumWidget;
+    QFormLayout* rightInputsLayout_;
+    QFormLayout* rightParametersLayout_;
+    QFormLayout* rightOutputsLayout_;
+
+    ModuleGraph defaultGraph_;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
-    void nodeSelected(Node &node);
+    void nodeLocked(Node &node);
+    void nodeDeleted(Node &node);
     void selectionChanged();
+
+    void leftGraphContextMenu(QPoint pos);
+    void toggleBarSet();
+
+    void on_leftCaptionLineEdit_textEdited(const QString &caption);
+    void on_leftDescriptionTextEdit_textChanged();
+
+
 };
 
 #endif // MAINWINDOW_H
