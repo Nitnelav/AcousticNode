@@ -53,8 +53,11 @@ SOURCES += \
     externals/nodeeditor/src/StyleCollection.cpp \
     src/modulemanager.cpp \
     src/modulegraph.cpp \
-    src/moduledata.cpp \
-    src/spectrummoduledata.cpp
+    src/moduledata/moduledata.cpp \
+    src/moduledata/spectrummoduledata.cpp \
+    src/moduledata/booleanmoduledata.cpp \
+    src/moduledata/floatmoduledata.cpp \
+    src/moduledata/integermoduledata.cpp
 
 HEADERS += \
     src/mainwindow.h \
@@ -108,13 +111,16 @@ HEADERS += \
     externals/nodeeditor/src/StyleCollection.hpp \
     src/modulemanager.h \
     src/moduleexceptions.h \
-    src/nodedata/spectrumdata.h \
-    src/nodedata/booleandata.h \
-    src/nodedata/integerdata.h \
-    src/nodedata/floatdata.h \
+    src/moduledata/spectrumdata.h \
+    src/moduledata/booleandata.h \
+    src/moduledata/integerdata.h \
+    src/moduledata/floatdata.h \
     src/modulegraph.h \
-    src/moduledata.h \
-    src/spectrummoduledata.h
+    src/moduledata/moduledata.h \
+    src/moduledata/spectrummoduledata.h \
+    src/moduledata/booleanmoduledata.h \
+    src/moduledata/floatmoduledata.h \
+    src/moduledata/integermoduledata.h
 
 FORMS += \
         src/mainwindow.ui

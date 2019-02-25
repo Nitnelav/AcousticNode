@@ -1,5 +1,4 @@
 #include "modulemanager.h"
-#include "moduleexceptions.h"
 
 #include <QDebug>
 

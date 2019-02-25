@@ -10,7 +10,7 @@
 #include <QtCharts/QBarCategoryAxis>
 
 
-#include "spectrummoduledata.h"
+#include "moduledata/spectrummoduledata.h"
 
 using namespace QtCharts;
 
@@ -34,7 +34,6 @@ public:
     bool isVisible(QBarSet* set);
     void showBarSet(QBarSet* set);
     void hideBarSet(QBarSet* set);
-
 
     QList<QBarSet *> barSetList() const{
         return barSetList_;

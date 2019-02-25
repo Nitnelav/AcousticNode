@@ -7,6 +7,7 @@
 #include <QMenuBar>
 #include <QFormLayout>
 #include <QDockWidget>
+#include <QMap>
 #include <QtCharts/QChart>
 
 #include <Node>
@@ -48,19 +49,7 @@ private:
     ScriptWrapperModel* lockedNode_;
 
     FlowScene* flowScene_;
-    QDockWidget* parameterDock_;
-    QDockWidget* _bddDock;
-    QDockWidget* _spectrumDock;
-
-    QFormLayout* leftInputsLayout_;
-    QFormLayout* leftParametersLayout_;
-    QFormLayout* leftOutputsLayout_;
-
-    QFormLayout* rightInputsLayout_;
-    QFormLayout* rightParametersLayout_;
-    QFormLayout* rightOutputsLayout_;
-
-    ModuleGraph defaultGraph_;
+    QMap<QUuid, QDockWidget*> nodeDocks_;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -68,16 +57,11 @@ public:
 
 private slots:
     void nodeLocked(Node &node);
+    void nodeCreated(Node &node);
     void nodeDeleted(Node &node);
     void selectionChanged();
 
-    void leftGraphContextMenu(QPoint pos);
-    void toggleBarSet();
-
-    void on_leftCaptionLineEdit_textEdited(const QString &caption);
-    void on_leftDescriptionTextEdit_textChanged();
-
-
+    void nodeContextMenu(Node& n, const QPointF& pos);
 };
 
 #endif // MAINWINDOW_H

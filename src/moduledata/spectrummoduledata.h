@@ -1,14 +1,12 @@
 #ifndef SPECTRUMMODULEDATA_H
 #define SPECTRUMMODULEDATA_H
 
-#include <memory>
-
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QtCharts/QBarSet>
 
 #include "moduledata.h"
-#include "nodedata/spectrumdata.h"
+#include "spectrumdata.h"
 
 using namespace QtCharts;
 

@@ -7,13 +7,13 @@ export const inputs = [
 ];
 
 export const parameters = [
-    { type: 'Lw', description: 'Output Lw'},
-    { type: 'float', description: 'Flow rate (m3/s)', default: 100.0 },
+    { type: 'spectrum', typeName: "Lw", description: 'Output Lw' },
+    { type: 'int', typeName: "Flow", description: 'Flow rate (m3/s)', default: 100.0 },
 ];
 
 export const outputs = [
-    { type: 'Lw', description: 'Output Lw' },
-    { type: 'Flow', description: 'Air flow rate' },
+    { type: 'spectrum', typeName: "Lw", description: 'Output Lw' },
+    { type: 'int', typeName: "Flow", description: 'Air flow rate' },
 ];
 
 export function calculate (inputs, parameters) {

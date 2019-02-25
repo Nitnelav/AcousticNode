@@ -7,11 +7,11 @@ export const inputs = [
 ];
 
 export const parameters = [
-    { type: 'Lw', description: 'Output Lw'},
+    { type: 'spectrum', typeName: "Lw", description: 'Output Lw'},
 ];
 
 export const outputs = [
-    { type: 'Lw', description: 'Output Lw' },
+    { type: 'spectrum', typeName: "Lw", description: 'Output Lw' },
 ];
 
 export function calculate (inputs, parameters) {

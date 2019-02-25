@@ -9,6 +9,13 @@
 #include <QJSValue>
 #include <QJSValueIterator>
 #include <QChartView>
+#include <QMenu>
+#include <QVBoxLayout>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QPlainTextEdit>
+#include <QGroupBox>
+#include <QSplitter>
 
 #include <NodeDataModel>
 #include <NodeData>
@@ -18,8 +25,11 @@
 
 #include "moduleexceptions.h"
 #include "modulegraph.h"
-#include "moduledata.h"
-#include "spectrummoduledata.h"
+#include "moduledata/moduledata.h"
+#include "moduledata/spectrummoduledata.h"
+#include "moduledata/floatmoduledata.h"
+#include "moduledata/integermoduledata.h"
+#include "moduledata/booleanmoduledata.h"
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -45,7 +55,8 @@ private:
     QList<std::shared_ptr<ModuleData> > parameters_;
     QList<std::shared_ptr<ModuleData> > outputs_;
 
-    std::shared_ptr<ModuleGraph> moduleGraph_;
+    ModuleGraph* moduleChart_;
+    QChartView* moduleChartView_;
 
     QJSValue inputsDefinition_;
     int numInputs_;
@@ -61,11 +72,14 @@ private:
     NodeValidationState validationState_ = NodeValidationState::Valid;
     QString validationMessage_;
 
+    QWidget* dockWidget_;
+
+    void setupDockWidget();
     void calculate();
 
 public:
     ScriptWrapperModel(QJSEngine *engine, QString path);
-    virtual ~ScriptWrapperModel() {}
+    virtual ~ScriptWrapperModel() override;
 
     void setCaption(const QString& caption) { caption_ = caption; }
     /// Caption is used in GUI
@@ -98,7 +112,7 @@ public:
 
     QWidget * embeddedWidget() override;
 
-    bool resizable() const override { return true; }
+    bool resizable() const override { return false; }
 
     int numInputs() const { return numInputs_; }
     int numParameters() const { return numParameters_; }
@@ -108,11 +122,16 @@ public:
     std::shared_ptr<ModuleData> getParameterData(int index) const;
     std::shared_ptr<ModuleData> getOutputData(int index) const;
 
-    ModuleGraph* getModuleGraph() const { return moduleGraph_.get(); }
+    ModuleGraph* getModuleGraph() const { return moduleChart_; }
+    QChartView* getModuleChartView() const { return moduleChartView_; }
+    QWidget *getDockWidget() const { return dockWidget_; }
 
 private slots:
 
     void parameterChanged();
+    void graphContextMenu(const QPoint &pos);
+    void toggleBarSet();
+
 };
 
 #endif // SCRIPTWRAPPERMODEL_H

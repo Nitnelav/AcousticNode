@@ -52,7 +52,7 @@ double SpectrumModuleData::getValue(int freq) const
 
 void SpectrumModuleData::setValue(int freq, double value)
 {
-    if (spectrumData_) {
+    if (spectrumData_ && value != spectrumData_->getValue(freq)) {
         spectrumData_->setValue(freq, value);
         barSet_->replace(freq, value);
         tableWidget_->item(0, freq)->setText(QString::number(value));
@@ -66,7 +66,9 @@ void SpectrumModuleData::cellChanged(int row, int freq)
         tableWidget_->item(row, freq)->setText(QString::number(spectrumData_->getValue(freq)));
         return;
     }
-    spectrumData_->setValue(freq, value);
-    barSet_->replace(freq, value);
-    Q_EMIT widgetDataChanged();
+    if (value != spectrumData_->getValue(freq)) {
+        spectrumData_->setValue(freq, value);
+        barSet_->replace(freq, value);
+        Q_EMIT widgetDataChanged();
+    }
 }

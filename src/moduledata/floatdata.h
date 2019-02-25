@@ -12,14 +12,14 @@ class FloatData : public NodeData
 {
 private:
 
-  float number_;
+  double number_;
 public:
 
   FloatData()
     : number_(0.0)
   {}
 
-  FloatData(float const number)
+  FloatData(double const number)
     : number_(number)
   {}
 
@@ -29,10 +29,10 @@ public:
                          "Float"};
   }
 
-  float number() const
+  double number() const
   { return number_; }
 
-  void setNumber(float const number)
+  void setNumber(double const number)
   { number_ = number; }
 
 };
