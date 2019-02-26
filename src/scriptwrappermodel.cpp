@@ -4,6 +4,7 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine* engine, QString path):
     js_(engine),
     path_(path)
 {
+    dockWidget_ = new QWidget();
     moduleChart_ = new ModuleGraph();
     moduleChartView_ = new QChartView();
 
@@ -136,7 +137,7 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine* engine, QString path):
 
 ScriptWrapperModel::~ScriptWrapperModel()
 {
-//    delete moduleGraph_;
+    delete dockWidget_;
 }
 
 QString ScriptWrapperModel::caption() const
@@ -276,7 +277,6 @@ void ScriptWrapperModel::setInData(std::shared_ptr<QtNodes::NodeData> data, QtNo
 
 void ScriptWrapperModel::setupDockWidget()
 {
-    dockWidget_ = new QWidget();
     QVBoxLayout* mainLayout = new QVBoxLayout();
 
     QFrame* infoFrame = new QFrame();
@@ -302,7 +302,7 @@ void ScriptWrapperModel::setupDockWidget()
         inputGroup->setLayout(inputLayout);
         dataLayout->addWidget(inputGroup);
         for (int index = 0; index < numInputs_; ++index) {
-            QWidget* widget = inputs_[index]->getWidget().get();
+            QWidget* widget = inputs_[index]->getWidget();
             inputLayout->addRow(inputs_[index]->description(), widget);
             widget->setDisabled(true);
             widget->show();
@@ -316,7 +316,7 @@ void ScriptWrapperModel::setupDockWidget()
         parameterGroup->setLayout(parameterLayout);
         dataLayout->addWidget(parameterGroup);
         for (int index = 0; index < numParameters_; ++index) {
-            QWidget* widget = parameters_[index]->getWidget().get();
+            QWidget* widget = parameters_[index]->getWidget();
             parameterLayout->addRow(parameters_[index]->description(), widget);
             widget->show();
         }
@@ -329,7 +329,7 @@ void ScriptWrapperModel::setupDockWidget()
         outputGroup->setLayout(outputLayout);
         dataLayout->addWidget(outputGroup);
         for (int index = 0; index < numOutputs_; ++index) {
-            QWidget* widget = outputs_[index]->getWidget().get();
+            QWidget* widget = outputs_[index]->getWidget();
             outputLayout->addRow(outputs_[index]->description(), widget);
             widget->setDisabled(true);
             widget->show();
@@ -470,6 +470,83 @@ QString ScriptWrapperModel::validationMessage() const
 QWidget *ScriptWrapperModel::embeddedWidget()
 {
     return nullptr;
+}
+
+QJsonObject ScriptWrapperModel::save() const
+{
+    QJsonObject modelJson;
+
+    modelJson["name"] = name();
+
+    QJsonArray parametersJson;
+
+    for (int index = 0; index < numParameters_; ++index) {
+        QJsonObject parameter;
+        QJSValue element = parametersDefinition_.property(index);
+        QString type = element.property("type").toString();
+        parameter["type"] = type;
+        QString typeName = element.property("typeName").toString();
+        parameter["typeName"] = typeName;
+        QString description = element.property("description").toString();
+        parameter["description"] = description;
+        if (type == "spectrum") {
+            QJsonArray array;
+            auto parameterData = std::static_pointer_cast<SpectrumModuleData>(parameters_[index]);
+            for (int freq = 0; freq < 8; ++freq) {
+                array.append(parameterData->getValue(freq));
+            }
+            parameter["data"] = array;
+        } else if (type == "int") {
+            auto parameterData = std::static_pointer_cast<IntegerModuleData>(parameters_[index]);
+            parameter["data"] = parameterData->getValue();
+        } else if (type == "bool") {
+            auto parameterData = std::static_pointer_cast<BooleanModuleData>(parameters_[index]);
+            parameter["data"] = parameterData->getValue();
+        } else if (type == "float") {
+            auto parameterData = std::static_pointer_cast<FloatModuleData>(parameters_[index]);
+            parameter["data"] = parameterData->getValue();
+        }
+        parametersJson.append(parameter);
+    }
+
+    modelJson["parameters"] = parametersJson;
+
+    return modelJson;
+}
+
+void ScriptWrapperModel::restore(const QJsonObject &json)
+{
+    QJsonArray parametersJson = json["parameters"].toArray();
+
+    for (int index = 0; index < numParameters_; ++index) {
+        if (parametersJson.at(index).isUndefined()) {
+            continue;
+        }
+        QJsonObject parameter = parametersJson.at(index).toObject();
+        QJSValue element = parametersDefinition_.property(index);
+        // TODO : check if type and description really corresponds ?
+        QString type = element.property("type").toString();
+        QString typeName = element.property("typeName").toString();
+        QString description = element.property("description").toString();
+
+        if (type == "spectrum") {
+            QJsonArray array = parameter["data"].toArray();
+            auto parameterData = std::static_pointer_cast<SpectrumModuleData>(parameters_[index]);
+            for (int freq = 0; freq < 8; ++freq) {
+                parameterData->setValue(freq, array[freq].toDouble());
+            }
+        } else if (type == "int") {
+            auto parameterData = std::static_pointer_cast<IntegerModuleData>(parameters_[index]);
+            parameterData->setValue(parameter["data"].toInt());
+        } else if (type == "bool") {
+            auto parameterData = std::static_pointer_cast<BooleanModuleData>(parameters_[index]);
+            parameterData->setValue(parameter["data"].toBool());
+        } else if (type == "float") {
+            auto parameterData = std::static_pointer_cast<FloatModuleData>(parameters_[index]);
+            parameterData->setValue(parameter["data"].toDouble());
+        }
+    }
+    parameterChanged();
 }
 
 std::shared_ptr<ModuleData> ScriptWrapperModel::getInputData(int index) const

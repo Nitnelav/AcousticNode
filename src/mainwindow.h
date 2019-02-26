@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#define MAX_RECENT_FILES 5
+
 #include <QMainWindow>
 #include <QJSEngine>
 #include <QVBoxLayout>
@@ -8,6 +10,9 @@
 #include <QFormLayout>
 #include <QDockWidget>
 #include <QMap>
+#include <QUuid>
+#include <QSettings>
+#include <QFileDialog>
 #include <QtCharts/QChart>
 
 #include <Node>
@@ -17,6 +22,7 @@
 #include <ConnectionStyle>
 #include <DataModelRegistry>
 
+#include "nodedockwidget.h"
 #include "scriptwrappermodel.h"
 #include "modulemanager.h"
 #include "modulegraph.h"
@@ -45,11 +51,14 @@ private:
     QJSEngine* js_;
     ModuleManager* moduleMgr_;
 
-    ScriptWrapperModel* selectedNode_;
-    ScriptWrapperModel* lockedNode_;
+    Node* selectedNode_;
+    Node* lockedNode_;
 
     FlowScene* flowScene_;
-    QMap<QUuid, QDockWidget*> nodeDocks_;
+    QMap<QUuid, NodeDockWidget*> nodeDocks_;
+
+    QString currentProject_;
+    bool isModified;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -62,6 +71,14 @@ private slots:
     void selectionChanged();
 
     void nodeContextMenu(Node& n, const QPointF& pos);
+
+    void dockClosed(QUuid nodeId);
+
+    void save();
+    void saveAs();
+    void newProject();
+    void openProject();
+    void openRecentProject();
 };
 
 #endif // MAINWINDOW_H

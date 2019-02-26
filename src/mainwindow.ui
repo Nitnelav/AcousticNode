@@ -69,6 +69,42 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuRecentProjects">
+     <property name="title">
+      <string>Recent Project</string>
+     </property>
+    </widget>
+    <addaction name="actionNewProject"/>
+    <addaction name="actionOpenProject"/>
+    <addaction name="menuRecentProjects"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSaveAs"/>
+   </widget>
+   <widget class="QMenu" name="menuDataBase">
+    <property name="title">
+     <string>DataBase</string>
+    </property>
+    <addaction name="actionDBSettings"/>
+    <addaction name="separator"/>
+    <addaction name="actionDBAddCategory"/>
+    <addaction name="actionDBAddElement"/>
+    <addaction name="separator"/>
+    <addaction name="actionBrowse"/>
+   </widget>
+   <widget class="QMenu" name="menuNodes">
+    <property name="title">
+     <string>Nodes</string>
+    </property>
+    <addaction name="actionAdd_Node"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuDataBase"/>
+   <addaction name="menuNodes"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
    <property name="minimumSize">
@@ -128,6 +164,83 @@
     </layout>
    </widget>
   </widget>
+  <action name="actionNewProject">
+   <property name="text">
+    <string>New Project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionOpenProject">
+   <property name="text">
+    <string>Open Project...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="text">
+    <string>Save As...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionDBSettings">
+   <property name="text">
+    <string>Settings...</string>
+   </property>
+  </action>
+  <action name="actionDBAddCategory">
+   <property name="text">
+    <string>Add Category...</string>
+   </property>
+  </action>
+  <action name="actionDBAddElement">
+   <property name="text">
+    <string>Add Element...</string>
+   </property>
+  </action>
+  <action name="actionBrowse">
+   <property name="text">
+    <string>Browse...</string>
+   </property>
+  </action>
+  <action name="actionAdd_Node">
+   <property name="text">
+    <string>Add Node...</string>
+   </property>
+  </action>
+  <action name="actiondf">
+   <property name="text">
+    <string>df</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

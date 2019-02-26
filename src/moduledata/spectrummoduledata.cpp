@@ -2,8 +2,8 @@
 
 SpectrumModuleData::SpectrumModuleData(const QString& description) : ModuleData (description)
 {
-    tableWidget_ = std::make_shared<QTableWidget>(1, 8);
-    barSet_ = std::make_shared<QBarSet>(description_);
+    tableWidget_ = new QTableWidget(1, 8);
+    barSet_ = new QBarSet(description_);
     QStringList headers = QStringList() << "63Hz" << "125Hz" << "250Hz" << "500Hz" << "1kHz" << "2kHz" << "4kHz" << "8kHz";
     tableWidget_->setHorizontalHeaderLabels(headers);
     tableWidget_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -12,11 +12,11 @@ SpectrumModuleData::SpectrumModuleData(const QString& description) : ModuleData 
     tableWidget_->resizeColumnsToContents();
     tableWidget_->setMaximumHeight(70);
 
-    connect(tableWidget_.get(), &QTableWidget::cellChanged, this, &SpectrumModuleData::cellChanged);
+    connect(tableWidget_, &QTableWidget::cellChanged, this, &SpectrumModuleData::cellChanged);
 
 }
 
-std::shared_ptr<QWidget> SpectrumModuleData::getWidget() const
+QWidget* SpectrumModuleData::getWidget() const
 {
     return tableWidget_;
 }

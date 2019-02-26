@@ -20,7 +20,7 @@ protected:
 public:
     ModuleData(const QString& description);
 
-    virtual std::shared_ptr<QWidget> getWidget() const = 0;
+    virtual QWidget* getWidget() const = 0;
     virtual std::shared_ptr<NodeData> getNodeData() const = 0;
     virtual void setNodeData(const std::shared_ptr<NodeData> &nodeData) = 0;
 

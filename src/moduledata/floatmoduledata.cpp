@@ -3,14 +3,14 @@
 FloatModuleData::FloatModuleData(const QString &description):
     ModuleData (description)
 {
-    spinBox_ = std::make_shared<QDoubleSpinBox>();
+    spinBox_ = new QDoubleSpinBox();
     spinBox_->setRange(-DBL_MAX, DBL_MAX);
 
     connect<void(QDoubleSpinBox::*)(double), void(FloatModuleData::*)(double)>
-            (spinBox_.get(), &QDoubleSpinBox::valueChanged, this, &FloatModuleData::valueChanged);
+            (spinBox_, &QDoubleSpinBox::valueChanged, this, &FloatModuleData::valueChanged);
 }
 
-std::shared_ptr<QWidget> FloatModuleData::getWidget() const
+QWidget *FloatModuleData::getWidget() const
 {
     return spinBox_;
 }

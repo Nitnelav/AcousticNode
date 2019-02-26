@@ -30,9 +30,9 @@ ModuleGraph::ModuleGraph():
 
 void ModuleGraph::appendSpectrumData(std::shared_ptr<SpectrumModuleData> data)
 {
-    barSeries_->append(data->getBarSet().get());
-    barSetList_.append(data->getBarSet().get());
-    connect(data->getBarSet().get(), &QBarSet::valueChanged, this, &ModuleGraph::valueChanged);
+    barSeries_->append(data->getBarSet());
+    barSetList_.append(data->getBarSet());
+    connect(data->getBarSet(), &QBarSet::valueChanged, this, &ModuleGraph::valueChanged);
 }
 
 void ModuleGraph::removeSpectrumData(std::shared_ptr<SpectrumModuleData> data)

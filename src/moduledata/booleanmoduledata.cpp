@@ -3,13 +3,13 @@
 BooleanModuleData::BooleanModuleData(const QString &description):
     ModuleData (description)
 {
-    checkBox_ = std::make_shared<QCheckBox>();
+    checkBox_ = new QCheckBox();
     checkBox_->setText("");
 
-    connect(checkBox_.get(), &QCheckBox::toggled, this, &BooleanModuleData::toggled);
+    connect(checkBox_, &QCheckBox::toggled, this, &BooleanModuleData::toggled);
 }
 
-std::shared_ptr<QWidget> BooleanModuleData::getWidget() const
+QWidget *BooleanModuleData::getWidget() const
 {
     return checkBox_;
 }
@@ -43,6 +43,7 @@ void BooleanModuleData::setValue(const bool &checked)
 {
     if (boolData_) {
         boolData_->setBoolean(checked);
+        checkBox_->setChecked(checked);
     }
 }
 

@@ -11,13 +11,13 @@ class IntegerModuleData : public ModuleData
     Q_OBJECT
 
 private:
-    std::shared_ptr<QSpinBox> spinBox_;
+    QSpinBox* spinBox_;
     std::shared_ptr<IntegerData> intData_;
 
 public:
     IntegerModuleData(const QString& description);
 
-    std::shared_ptr<QWidget> getWidget() const override;
+    QWidget* getWidget() const override;
     std::shared_ptr<NodeData> getNodeData() const override;
     void setNodeData(const std::shared_ptr<QtNodes::NodeData> &nodeData) override;
 

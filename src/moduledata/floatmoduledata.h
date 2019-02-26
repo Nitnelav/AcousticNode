@@ -13,13 +13,13 @@ class FloatModuleData : public ModuleData
     Q_OBJECT
 
 private:
-    std::shared_ptr<QDoubleSpinBox> spinBox_;
+    QDoubleSpinBox* spinBox_;
     std::shared_ptr<FloatData> floatData_;
 
 public:
     FloatModuleData(const QString& description);
 
-    std::shared_ptr<QWidget> getWidget() const override;
+    QWidget* getWidget() const override;
     std::shared_ptr<NodeData> getNodeData() const override;
     void setNodeData(const std::shared_ptr<QtNodes::NodeData> &nodeData) override;
 

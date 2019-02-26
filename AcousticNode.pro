@@ -57,7 +57,8 @@ SOURCES += \
     src/moduledata/spectrummoduledata.cpp \
     src/moduledata/booleanmoduledata.cpp \
     src/moduledata/floatmoduledata.cpp \
-    src/moduledata/integermoduledata.cpp
+    src/moduledata/integermoduledata.cpp \
+    src/nodedockwidget.cpp
 
 HEADERS += \
     src/mainwindow.h \
@@ -120,7 +121,8 @@ HEADERS += \
     src/moduledata/spectrummoduledata.h \
     src/moduledata/booleanmoduledata.h \
     src/moduledata/floatmoduledata.h \
-    src/moduledata/integermoduledata.h
+    src/moduledata/integermoduledata.h \
+    src/nodedockwidget.h
 
 FORMS += \
         src/mainwindow.ui

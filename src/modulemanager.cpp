@@ -44,7 +44,7 @@ void ModuleManager::moduleValidator(QDir &dir)
     }
 }
 
-std::shared_ptr<QtNodes::DataModelRegistry> ModuleManager::getModuleRegistry()
+std::shared_ptr<DataModelRegistry> ModuleManager::getModuleRegistry()
 {
     auto ret = std::make_shared<DataModelRegistry>();
     QJSEngine* js = js_;

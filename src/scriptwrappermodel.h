@@ -16,6 +16,9 @@
 #include <QPlainTextEdit>
 #include <QGroupBox>
 #include <QSplitter>
+#include <QJsonArray>
+#include <QJsonObject>>
+#include <QJsonValue>
 
 #include <NodeDataModel>
 #include <NodeData>
@@ -113,6 +116,9 @@ public:
     QWidget * embeddedWidget() override;
 
     bool resizable() const override { return false; }
+
+    QJsonObject save() const override;
+    void restore(QJsonObject const & json) override;
 
     int numInputs() const { return numInputs_; }
     int numParameters() const { return numParameters_; }

@@ -3,14 +3,14 @@
 IntegerModuleData::IntegerModuleData(const QString &description):
     ModuleData (description)
 {
-    spinBox_ = std::make_shared<QSpinBox>();
+    spinBox_ = new QSpinBox();
     spinBox_->setRange(-32768, 32767);
 
     connect<void(QSpinBox::*)(int), void(IntegerModuleData::*)(int)>
-            (spinBox_.get(), &QSpinBox::valueChanged, this, &IntegerModuleData::valueChanged);
+            (spinBox_, &QSpinBox::valueChanged, this, &IntegerModuleData::valueChanged);
 }
 
-std::shared_ptr<QWidget> IntegerModuleData::getWidget() const
+QWidget *IntegerModuleData::getWidget() const
 {
     return spinBox_;
 }

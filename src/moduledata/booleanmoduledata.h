@@ -12,13 +12,13 @@ class BooleanModuleData : public ModuleData
 
 private:
 
-    std::shared_ptr<QCheckBox> checkBox_;
+    QCheckBox* checkBox_;
     std::shared_ptr<BooleanData> boolData_;
 
 public:
     BooleanModuleData(const QString& description);
 
-    std::shared_ptr<QWidget> getWidget() const override;
+    QWidget* getWidget() const override;
     std::shared_ptr<NodeData> getNodeData() const override;
     void setNodeData(const std::shared_ptr<QtNodes::NodeData> &nodeData) override;
 
