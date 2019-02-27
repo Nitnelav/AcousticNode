@@ -3,22 +3,24 @@ export const name = 'LwCorrection';
 export const caption = 'Lw Correction';
 
 export const inputs = [
-    { type: 'spectrum', typeName: "Lw", description: 'Input Lw'},
+    { id: "in1", type: 'spectrum', typeName: "Lw", description: 'Input Lw'},
 ];
 
 export const parameters = [
-    { type: 'spectrum', typeName: "Lw", description: 'Correction Lw'},
+    { id: "param1", type: 'spectrum', typeName: "Lw", description: 'Correction Lw'},
 ];
 
 export const outputs = [
-    { type: 'spectrum', typeName: "Lw", description: 'Output Lw' },
+    { id: "out1", type: 'spectrum', typeName: "Lw", description: 'Output Lw' },
 ];
 
 export function calculate (inputs, parameters) {
+    var outputs = {};
     var outputLw = [];
     for (let freq = 0; freq < 8; freq++) {
-        outputLw[freq] = inputs[0][freq] + parameters[0][freq];
+        outputLw[freq] = inputs["in1"][freq] + parameters["param1"][freq];
     }
-    return [ outputLw ];
+    outputs["out1"] = outputLw;
+    return outputs;
 };
 

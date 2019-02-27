@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include <QJSValue>
 #include <QObject>
 #include <QWidget>
 
@@ -15,10 +16,14 @@ class ModuleData : public QObject
     Q_OBJECT
 
 protected:
+    QString id_;
+    QString type_;
+    QString typeName_;
     QString description_;
+    bool required_;
 
 public:
-    ModuleData(const QString& description);
+    ModuleData(const QJSValue& element);
 
     virtual QWidget* getWidget() const = 0;
     virtual std::shared_ptr<NodeData> getNodeData() const = 0;
@@ -26,6 +31,20 @@ public:
 
     QString description() const
     { return description_; }
+
+    QString id() const
+    { return id_; }
+
+    QString type() const
+    { return type_; }
+
+    QString typeName() const
+    { return typeName_; }
+
+    bool required() const
+    { return required_; }
+
+    QString caption() const;
 
 signals:
     void widgetDataChanged();

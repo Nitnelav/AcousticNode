@@ -1,7 +1,7 @@
 #include "booleanmoduledata.h"
 
-BooleanModuleData::BooleanModuleData(const QString &description):
-    ModuleData (description)
+BooleanModuleData::BooleanModuleData(const QJSValue &element):
+    ModuleData (element)
 {
     checkBox_ = new QCheckBox();
     checkBox_->setText("");
@@ -24,10 +24,8 @@ void BooleanModuleData::setNodeData(const std::shared_ptr<QtNodes::NodeData> &no
     boolData_ = std::static_pointer_cast<BooleanData>(nodeData);
     if (boolData_) {
         checkBox_->setChecked(boolData_->boolean());
-        checkBox_->setDisabled(false);
     } else {
         checkBox_->setChecked(false);
-        checkBox_->setDisabled(true);
     }
 }
 
@@ -49,7 +47,9 @@ void BooleanModuleData::setValue(const bool &checked)
 
 void BooleanModuleData::toggled()
 {
-    boolData_->setBoolean(checkBox_->isChecked());
+    if (boolData_) {
+        boolData_->setBoolean(checkBox_->isChecked());
+    }
 
     Q_EMIT widgetDataChanged();
 }

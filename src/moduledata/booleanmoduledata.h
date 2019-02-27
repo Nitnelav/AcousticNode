@@ -16,7 +16,7 @@ private:
     std::shared_ptr<BooleanData> boolData_;
 
 public:
-    BooleanModuleData(const QString& description);
+    BooleanModuleData(const QJSValue& element);
 
     QWidget* getWidget() const override;
     std::shared_ptr<NodeData> getNodeData() const override;

@@ -1,6 +1,6 @@
 #include "spectrummoduledata.h"
 
-SpectrumModuleData::SpectrumModuleData(const QString& description) : ModuleData (description)
+SpectrumModuleData::SpectrumModuleData(const QJSValue &element) : ModuleData (element)
 {
     tableWidget_ = new QTableWidget(1, 8);
     barSet_ = new QBarSet(description_);

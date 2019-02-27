@@ -20,7 +20,7 @@ protected:
     std::shared_ptr<SpectrumData> spectrumData_;
 
 public:
-    SpectrumModuleData(const QString& description);
+    SpectrumModuleData(const QJSValue& element);
 
     QWidget* getWidget() const override;
     std::shared_ptr<NodeData> getNodeData() const override;

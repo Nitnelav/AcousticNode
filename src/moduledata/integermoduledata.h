@@ -15,7 +15,7 @@ private:
     std::shared_ptr<IntegerData> intData_;
 
 public:
-    IntegerModuleData(const QString& description);
+    IntegerModuleData(const QJSValue& element);
 
     QWidget* getWidget() const override;
     std::shared_ptr<NodeData> getNodeData() const override;

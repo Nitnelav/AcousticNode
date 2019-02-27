@@ -16,121 +16,121 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine* engine, QString path):
     if (!module_.hasProperty("name") || !module_.property("name").isString()) {
         throw MissingOrBadPropertyError(path.toLatin1(), "name");
     }
-    caption_ = module_.property("name").toString();
-    description_ = "";
-    descriptionWidget_ = std::make_shared<QLabel>(description_);
-
     if (!module_.hasProperty("caption") || !module_.property("caption").isString()) {
         throw MissingOrBadPropertyError(path.toLatin1(), "caption");
     }
     if (!module_.hasProperty("inputs") || !module_.property("inputs").isArray()) {
         throw MissingOrBadPropertyError(path.toLatin1(), "inputs");
-    } else {
-        inputsDefinition_ = module_.property("inputs");
-        numInputs_ = inputsDefinition_.property("length").toInt();
-        for (int index = 0; index < numInputs_; ++index) {
-            QJSValue element = inputsDefinition_.property(index);
-            QString type = element.property("type").toString();
-            QString description = element.property("description").toString();
-            if (type == "spectrum") {
-                auto spectrumData = std::make_shared<SpectrumModuleData>(description);
-                inputs_.append(spectrumData);
-                moduleChart_->appendSpectrumData(spectrumData);
-            } else if (type == "int") {
-                inputs_.append(std::make_shared<IntegerModuleData>(description));
-            } else if (type == "bool") {
-                inputs_.append(std::make_shared<BooleanModuleData>(description));
-            } else if (type == "float") {
-                inputs_.append(std::make_shared<FloatModuleData>(description));
-            } else {
-                inputs_.append(nullptr);
-            }
-        }
-        inputArgs_ = js_->newArray(numInputs_);
-        if (numInputs_ > 0) {
-            validationState_ = NodeValidationState::Warning;
-            validationMessage_ = QString("Missing inputs");
-        }
     }
     if (!module_.hasProperty("parameters") || !module_.property("parameters").isArray()) {
         throw MissingOrBadPropertyError(path.toLatin1(), "parameters");
-    } else {
-        parametersDefinition_ = module_.property("parameters");
-        numParameters_= parametersDefinition_.property("length").toInt();
-        parameterArgs_ = js_->newArray(numParameters_);
-        for (int index = 0; index < numParameters_; ++index) {
-            QJSValue element = parametersDefinition_.property(index);
-            QString type = element.property("type").toString();
-            QString description = element.property("description").toString();
-            if (type == "spectrum") {
-                auto spectrumModuleData = std::make_shared<SpectrumModuleData>(description);
-                auto spectrumData = std::make_shared<SpectrumData>();
-                spectrumModuleData->setNodeData(spectrumData);
-                connect(spectrumModuleData.get(), &SpectrumModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
-                parameters_.append(spectrumModuleData);
-                moduleChart_->appendSpectrumData(spectrumModuleData);
-                QJSValue array = js_->newArray(8);
-                for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; ++freq) {
-                    array.setProperty(freq, spectrumModuleData->getValue(freq));
-                }
-                parameterArgs_.setProperty(index, array);
-            } else if (type == "int") {
-                auto integerModuleData = std::make_shared<IntegerModuleData>(description);
-                auto integerData = std::make_shared<IntegerData>();
-                integerModuleData->setNodeData(integerData);
-                connect(integerModuleData.get(), &IntegerModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
-                parameters_.append(integerModuleData);
-                parameterArgs_.setProperty(index, integerData->number());
-            } else if (type == "bool") {
-                auto booleanModuleData = std::make_shared<BooleanModuleData>(description);
-                auto booleanData = std::make_shared<BooleanData>();
-                booleanModuleData->setNodeData(booleanData);
-                connect(booleanModuleData.get(), &BooleanModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
-                parameters_.append(booleanModuleData);
-                parameterArgs_.setProperty(index, booleanData->boolean());
-            } else if (type == "float") {
-                auto floatModuleData = std::make_shared<FloatModuleData>(description);
-                auto floatData = std::make_shared<FloatData>();
-                floatModuleData->setNodeData(floatData);
-                connect(floatModuleData.get(), &FloatModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
-                parameters_.append(floatModuleData);
-                parameterArgs_.setProperty(index, floatData->number());
-            } else {
-                parameters_.append(nullptr);
-            }
-        }
     }
     if (!module_.hasProperty("outputs") || !module_.property("outputs").isArray()) {
         throw MissingOrBadPropertyError(path.toLatin1(), "outputs");
-    } else {
-        outputsDefinition_ = module_.property("outputs");
-        numOutputs_ = outputsDefinition_.property("length").toInt();
-        for (int index = 0; index < numOutputs_; ++index) {
-            QJSValue element = outputsDefinition_.property(index);
-            QString type = element.property("type").toString();
-            QString description = element.property("description").toString();
-            if (type == "spectrum") {
-                auto spectrumData = std::make_shared<SpectrumModuleData>(description);
-                outputs_.append(spectrumData);
-                moduleChart_->appendSpectrumData(spectrumData);
-            } else if (type == "int") {
-                outputs_.append(std::make_shared<IntegerModuleData>(description));
-            } else if (type == "bool") {
-                outputs_.append(std::make_shared<BooleanModuleData>(description));
-            } else if (type == "float") {
-                outputs_.append(std::make_shared<FloatModuleData>(description));
-            } else {
-                outputs_.append(nullptr);
-            }
-        }
     }
     if (!module_.hasProperty("calculate") || !module_.property("calculate").isCallable()) {
         throw MissingOrBadPropertyError(path.toLatin1(), "calculate");
     }
 
+    caption_ = module_.property("caption").toString();
+    description_ = "";
+    descriptionWidget_ = std::make_shared<QLabel>(description_);
+
+    inputArgs_ = js_->newObject();
+    inputsDefinition_ = module_.property("inputs");
+    numInputs_ = inputsDefinition_.property("length").toInt();
+    bool atLeastOneInputRequired = false;
+    for (int index = 0; index < numInputs_; ++index) {
+        QJSValue element = inputsDefinition_.property(index);
+        QString type = element.property("type").toString();
+        if (type == "spectrum") {
+            auto spectrumModuleData = std::make_shared<SpectrumModuleData>(element);
+            inputs_.append(spectrumModuleData);
+            moduleChart_->appendSpectrumData(spectrumModuleData);
+        } else if (type == "int") {
+            inputs_.append(std::make_shared<IntegerModuleData>(element));
+        } else if (type == "bool") {
+            inputs_.append(std::make_shared<BooleanModuleData>(element));
+        } else if (type == "float") {
+            inputs_.append(std::make_shared<FloatModuleData>(element));
+        } else {
+            inputs_.append(nullptr);
+        }
+        if (inputs_[index]->required()) {
+            atLeastOneInputRequired = true;
+        }
+    }
+
+    parameterArgs_ = js_->newObject();
+    parametersDefinition_ = module_.property("parameters");
+    numParameters_= parametersDefinition_.property("length").toInt();
+    for (int index = 0; index < numParameters_; ++index) {
+        QJSValue element = parametersDefinition_.property(index);
+        QString type = element.property("type").toString();
+        if (type == "spectrum") {
+            auto spectrumModuleData = std::make_shared<SpectrumModuleData>(element);
+            auto spectrumData = std::make_shared<SpectrumData>();
+            spectrumModuleData->setNodeData(spectrumData);
+            connect(spectrumModuleData.get(), &SpectrumModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
+            parameters_.append(spectrumModuleData);
+            moduleChart_->appendSpectrumData(spectrumModuleData);
+            QJSValue array = js_->newArray(8);
+            for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; ++freq) {
+                array.setProperty(freq, spectrumModuleData->getValue(freq));
+            }
+            parameterArgs_.setProperty(spectrumModuleData->id(), array);
+        } else if (type == "int") {
+            auto integerModuleData = std::make_shared<IntegerModuleData>(element);
+            auto integerData = std::make_shared<IntegerData>();
+            integerModuleData->setNodeData(integerData);
+            connect(integerModuleData.get(), &IntegerModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
+            parameters_.append(integerModuleData);
+            parameterArgs_.setProperty(integerModuleData->id(), integerData->number());
+        } else if (type == "bool") {
+            auto booleanModuleData = std::make_shared<BooleanModuleData>(element);
+            auto booleanData = std::make_shared<BooleanData>();
+            booleanModuleData->setNodeData(booleanData);
+            connect(booleanModuleData.get(), &BooleanModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
+            parameters_.append(booleanModuleData);
+            parameterArgs_.setProperty(booleanModuleData->id(), booleanData->boolean());
+        } else if (type == "float") {
+            auto floatModuleData = std::make_shared<FloatModuleData>(element);
+            auto floatData = std::make_shared<FloatData>();
+            floatModuleData->setNodeData(floatData);
+            connect(floatModuleData.get(), &FloatModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
+            parameters_.append(floatModuleData);
+            parameterArgs_.setProperty(floatModuleData->id(), floatData->number());
+        } else {
+            parameters_.append(nullptr);
+        }
+    }
+
+    outputsDefinition_ = module_.property("outputs");
+    numOutputs_ = outputsDefinition_.property("length").toInt();
+    for (int index = 0; index < numOutputs_; ++index) {
+        QJSValue element = outputsDefinition_.property(index);
+        QString type = element.property("type").toString();
+        if (type == "spectrum") {
+            auto spectrumData = std::make_shared<SpectrumModuleData>(element);
+            outputs_.append(spectrumData);
+            moduleChart_->appendSpectrumData(spectrumData);
+        } else if (type == "int") {
+            outputs_.append(std::make_shared<IntegerModuleData>(element));
+        } else if (type == "bool") {
+            outputs_.append(std::make_shared<BooleanModuleData>(element));
+        } else if (type == "float") {
+            outputs_.append(std::make_shared<FloatModuleData>(element));
+        } else {
+            outputs_.append(nullptr);
+        }
+    }
+
     setupDockWidget();
 
-    if (numInputs_ == 0) {
+    if (atLeastOneInputRequired) {
+        validationState_ = NodeValidationState::Warning;
+        validationMessage_ = QString("Missing inputs");
+    } else {
         calculate();
     }
 }
@@ -158,116 +158,109 @@ QString ScriptWrapperModel::name() const
 
 QString ScriptWrapperModel::portCaption(QtNodes::PortType portType, QtNodes::PortIndex index) const
 {
-    QString arrayProperty;
     if (portType == PortType::In) {
-        arrayProperty = "inputs";
+        if (index >= numInputs_) {
+            return "";
+        }
+        return inputs_[index]->caption();
     }
     else if (portType == PortType::Out) {
-        arrayProperty = "outputs";
+        if (index >= numOutputs_) {
+            return "";
+        }
+        return outputs_[index]->caption();
     }
     else {
         return "";
     }
-    QJSValue array = module_.property(arrayProperty);
-    int arrayLength = array.property("length").toInt();
-    if (index >= arrayLength)
-        throw;
-    QJSValue element = array.property(index);
-    if (element.isError() || !element.hasProperty("typeName"))
-        throw;
-    return element.property("typeName").toString();
 }
 
 unsigned int ScriptWrapperModel::nPorts(QtNodes::PortType portType) const
 {
-    QString arrayProperty;
     if (portType == PortType::In) {
-        arrayProperty = "inputs";
+        return numInputs_;
     }
     else if (portType == PortType::Out) {
-        arrayProperty = "outputs";
+        return numOutputs_;
     }
     else {
         return 0;
     }
-    QJSValue array = module_.property(arrayProperty);
-    return array.property("length").toInt();
 }
 
 QtNodes::NodeDataType ScriptWrapperModel::dataType(QtNodes::PortType portType, QtNodes::PortIndex index) const
 {
-    QString arrayProperty;
+    QString typeName, caption;
     if (portType == PortType::In) {
-        arrayProperty = "inputs";
+        if (index >= numInputs_) {
+            return NodeDataType();
+        }
+        typeName =  inputs_[index]->typeName();
+        caption =  inputs_[index]->caption();
     }
     else if (portType == PortType::Out) {
-        arrayProperty = "outputs";
+        if (index >= numOutputs_) {
+            return NodeDataType();
+        }
+        typeName =  outputs_[index]->typeName();
+        caption =  outputs_[index]->caption();
     }
     else {
         return NodeDataType();
     }
-    QJSValue array = module_.property(arrayProperty);
-    int arrayLength = array.property("length").toInt();
-    if (index >= arrayLength)
-        throw;
-    QJSValue element = array.property(index);
-    if (element.isError() || !element.hasProperty("typeName"))
-        throw;
-    QString typeName = element.property("typeName").toString();
-    return NodeDataType { typeName, typeName};
+    return NodeDataType { typeName, caption};
 }
 
 void ScriptWrapperModel::setInData(std::shared_ptr<QtNodes::NodeData> data, QtNodes::PortIndex index)
 {
+    QString id = inputs_[index]->id();
+    QString type = inputs_[index]->type();
+    bool required = inputs_[index]->required();
+
     if (!data) {
-        for (int index = 0; index < numOutputs_; ++index) {
-            outputs_[index]->setNodeData(nullptr);
-            inputs_[index]->setNodeData(nullptr);
-            Q_EMIT dataUpdated(index);
+        inputs_[index]->setNodeData(nullptr);
+        if (required) {
+            for (int outIndex = 0; outIndex < numOutputs_; ++outIndex) {
+                outputs_[outIndex]->setNodeData(nullptr);
+                Q_EMIT dataUpdated(outIndex);
+            }
+            validationState_ = NodeValidationState::Warning;
+            validationMessage_ = QString("Missing or invalid inputs");
+        } else {
+            inputArgs_.setProperty(id, QJSValue::UndefinedValue);
+            calculate();
         }
-        validationState_ = NodeValidationState::Warning;
-        validationMessage_ = QString("Missing or invalid inputs");
         return;
     }
-
-    QJSValue element = inputsDefinition_.property(index);
-    QString type = element.property("type").toString();
 
     if (type == "spectrum") {
         auto inputData = std::dynamic_pointer_cast<SpectrumData>(data);
         auto inputModuleData = std::dynamic_pointer_cast<SpectrumModuleData>(inputs_[index]);
         inputModuleData->setNodeData(inputData);
         QJSValue array = js_->newArray(8);
-        for (int i = 0; i < 8; ++i) {
-            array.setProperty(i, inputData->getValue(i));
+        for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; ++freq) {
+            array.setProperty(freq, inputData->getValue(freq));
         }
-        inputArgs_.setProperty(index, array);
+        inputArgs_.setProperty(id, array);
     } else if (type == "int") {
         auto inputData = std::dynamic_pointer_cast<IntegerData>(data);
         auto inputModuleData = std::dynamic_pointer_cast<IntegerModuleData>(inputs_[index]);
         inputModuleData->setNodeData(inputData);
-        inputArgs_.setProperty(index, inputData->number());
+        inputArgs_.setProperty(id, inputData->number());
     } else if (type == "bool") {
         auto inputData = std::dynamic_pointer_cast<BooleanData>(data);
         auto inputModuleData = std::dynamic_pointer_cast<BooleanModuleData>(inputs_[index]);
         inputModuleData->setNodeData(inputData);
-        inputArgs_.setProperty(index, inputData->boolean());
+        inputArgs_.setProperty(id, inputData->boolean());
     } else if (type == "float") {
         auto inputData = std::dynamic_pointer_cast<FloatData>(data);
         auto inputModuleData = std::dynamic_pointer_cast<FloatModuleData>(inputs_[index]);
         inputModuleData->setNodeData(inputData);
-        inputArgs_.setProperty(index, inputData->number());
+        inputArgs_.setProperty(id, inputData->number());
     } else {
         return;
     }
 
-    for (int i = 0; i < numInputs_; i++) {
-        if (!inputs_[i]->getNodeData()) {
-            validationState_ = NodeValidationState::Warning;
-            validationMessage_ = QString("Missing or invalid inputs");
-            return;
-        }
-    }
     validationState_ = NodeValidationState::Valid;
     validationMessage_ = QString("");
 
@@ -353,7 +346,15 @@ void ScriptWrapperModel::setupDockWidget()
 }
 
 void ScriptWrapperModel::calculate()
-{
+{    
+    for (int index = 0; index < numInputs_; index++) {
+        if (inputs_[index]->required() && !inputs_[index]->getNodeData()) {
+            validationState_ = NodeValidationState::Warning;
+            validationMessage_ = QString("Missing or invalid inputs");
+            return;
+        }
+    }
+
     QJSValue function = module_.property("calculate");
     QJSValueList args;
     args.append(inputArgs_);
@@ -365,29 +366,29 @@ void ScriptWrapperModel::calculate()
         validationMessage_ = QString("Script Error");
         return;
     }
-    if (!result.isArray()) {
+    if (!result.isObject()) {
         validationState_ = NodeValidationState::Error;
-        validationMessage_ = QString("Script output is not an array");
-        return;
-    }
-    if (result.property("length").toInt() != numOutputs_) {
-        validationState_ = NodeValidationState::Error;
-        validationMessage_ = QString("Script output array has the wrong size");
+        validationMessage_ = QString("Script output is not an object");
         return;
     }
 
     for (int index = 0; index < numOutputs_; index++) {
-        QString type = outputsDefinition_.property(index).property("type").toString();
-        QString description = outputsDefinition_.property(index).property("description").toString();
+        QString type = outputs_[index]->type();
+        QString id = outputs_[index]->id();
+        if (!result.hasProperty(id)) {
+            outputs_[index]->setNodeData(nullptr);
+            Q_EMIT dataUpdated(index);
+            continue;
+        }
         if (type == "spectrum") {
-            if (!result.property(index).isArray()) {
+            if (!result.property(id).isArray()) {
                 validationState_ = NodeValidationState::Error;
-                validationMessage_ = QString("Script output at index %1 is not an array (Spectrum)").arg(index);
+                validationMessage_ = QString("Script output '%1' is not an array (spectrum)").arg(id);
                 return;
             }
-            if (result.property(index).property("length").toInt() != 8) {
+            if (result.property(id).property("length").toInt() != 8) {
                 validationState_ = NodeValidationState::Error;
-                validationMessage_ = QString("Script output at index %1 must be an array of size 8 (Spectrum)").arg(index);
+                validationMessage_ = QString("Script output '%1' must be an array of size 8 (spectrum)").arg(id);
                 return;
             }
             std::shared_ptr<SpectrumData> outputData;
@@ -399,12 +400,12 @@ void ScriptWrapperModel::calculate()
                 ouput->setNodeData(outputData);
             }
             for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; ++freq) {
-                ouput->setValue(freq, result.property(index).property(freq).toNumber());
+                ouput->setValue(freq, result.property(id).property(freq).toNumber());
             }
         } else if (type == "int") {
-            if (!result.property(index).isNumber()) {
+            if (!result.property(id).isNumber()) {
                 validationState_ = NodeValidationState::Error;
-                validationMessage_ = QString("Script output at index %1 is not an number (Int)").arg(index);
+                validationMessage_ = QString("Script output '%1' is not an number (int)").arg(id);
                 return;
             }
             std::shared_ptr<IntegerData> outputData;
@@ -415,11 +416,11 @@ void ScriptWrapperModel::calculate()
                 outputData = std::make_shared<IntegerData>();
                 ouput->setNodeData(outputData);
             }
-            ouput->setValue(result.property(index).toNumber());
+            ouput->setValue(result.property(id).toNumber());
         } else if (type == "bool") {
-            if (!result.property(index).isBool()) {
+            if (!result.property(id).isBool()) {
                 validationState_ = NodeValidationState::Error;
-                validationMessage_ = QString("Script output at index %1 is not an boolean (bool)").arg(index);
+                validationMessage_ = QString("Script output '%1' is not an boolean (bool)").arg(id);
                 return;
             }
             std::shared_ptr<BooleanData> outputData;
@@ -430,11 +431,11 @@ void ScriptWrapperModel::calculate()
                 outputData = std::make_shared<BooleanData>();
                 ouput->setNodeData(outputData);
             }
-            ouput->setValue(result.property(index).toBool());
+            ouput->setValue(result.property(id).toBool());
         } else if (type == "float") {
-            if (!result.property(index).isNumber()) {
+            if (!result.property(id).isNumber()) {
                 validationState_ = NodeValidationState::Error;
-                validationMessage_ = QString("Script output at index %1 is not an number (float)").arg(index);
+                validationMessage_ = QString("Script output '%1' is not an number (float)").arg(id);
                 return;
             }
             std::shared_ptr<FloatData> outputData;
@@ -445,7 +446,7 @@ void ScriptWrapperModel::calculate()
                 outputData = std::make_shared<FloatData>();
                 ouput->setNodeData(outputData);
             }
-            ouput->setValue(result.property(index).toNumber());
+            ouput->setValue(result.property(id).toNumber());
         }
         Q_EMIT dataUpdated(index);
     }
@@ -478,17 +479,15 @@ QJsonObject ScriptWrapperModel::save() const
 
     modelJson["name"] = name();
 
-    QJsonArray parametersJson;
+    QJsonObject parametersJson;
 
     for (int index = 0; index < numParameters_; ++index) {
         QJsonObject parameter;
-        QJSValue element = parametersDefinition_.property(index);
-        QString type = element.property("type").toString();
+        QString type = parameters_[index]->type();
+        QString id = parameters_[index]->id();
         parameter["type"] = type;
-        QString typeName = element.property("typeName").toString();
-        parameter["typeName"] = typeName;
-        QString description = element.property("description").toString();
-        parameter["description"] = description;
+        parameter["typeName"] = parameters_[index]->typeName();
+        parameter["description"] = parameters_[index]->description();
         if (type == "spectrum") {
             QJsonArray array;
             auto parameterData = std::static_pointer_cast<SpectrumModuleData>(parameters_[index]);
@@ -506,7 +505,7 @@ QJsonObject ScriptWrapperModel::save() const
             auto parameterData = std::static_pointer_cast<FloatModuleData>(parameters_[index]);
             parameter["data"] = parameterData->getValue();
         }
-        parametersJson.append(parameter);
+        parametersJson[id] = parameter;
     }
 
     modelJson["parameters"] = parametersJson;
@@ -516,18 +515,21 @@ QJsonObject ScriptWrapperModel::save() const
 
 void ScriptWrapperModel::restore(const QJsonObject &json)
 {
-    QJsonArray parametersJson = json["parameters"].toArray();
+    QJsonObject parametersJson = json["parameters"].toObject();
 
     for (int index = 0; index < numParameters_; ++index) {
-        if (parametersJson.at(index).isUndefined()) {
+
+        QString id = parameters_[index]->id();
+        QString type = parameters_[index]->type();
+
+        if (parametersJson[id].isUndefined()) {
             continue;
         }
-        QJsonObject parameter = parametersJson.at(index).toObject();
-        QJSValue element = parametersDefinition_.property(index);
-        // TODO : check if type and description really corresponds ?
-        QString type = element.property("type").toString();
-        QString typeName = element.property("typeName").toString();
-        QString description = element.property("description").toString();
+        QJsonObject parameter = parametersJson[id].toObject();
+
+        if (type != parameter["type"].toString()) {
+            continue;
+        }
 
         if (type == "spectrum") {
             QJsonArray array = parameter["data"].toArray();
@@ -567,23 +569,22 @@ std::shared_ptr<ModuleData> ScriptWrapperModel::getOutputData(int index) const
 void ScriptWrapperModel::parameterChanged()
 {
     for (int index = 0; index < numParameters_; ++index) {
-        QJSValue element = parametersDefinition_.property(index);
-        QString type = element.property("type").toString();
-        QString description = element.property("description").toString();
+        QString id = parameters_[index]->id();
+        QString type = parameters_[index]->type();
         if (type == "spectrum") {
             auto parameterData = std::static_pointer_cast<SpectrumModuleData>(parameters_[index]);
-            for (int freq = 0; freq < 8; ++freq) {
-                parameterArgs_.property(index).setProperty(freq, parameterData->getValue(freq));
+            for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; ++freq) {
+                parameterArgs_.property(id).setProperty(freq, parameterData->getValue(freq));
             }
         } else if (type == "int") {
             auto parameterData = std::static_pointer_cast<IntegerModuleData>(parameters_[index]);
-            parameterArgs_.setProperty(index, parameterData->getValue());
+            parameterArgs_.setProperty(id, parameterData->getValue());
         } else if (type == "bool") {
             auto parameterData = std::static_pointer_cast<BooleanModuleData>(parameters_[index]);
-            parameterArgs_.setProperty(index, parameterData->getValue());
+            parameterArgs_.setProperty(id, parameterData->getValue());
         } else if (type == "float") {
             auto parameterData = std::static_pointer_cast<FloatModuleData>(parameters_[index]);
-            parameterArgs_.setProperty(index, parameterData->getValue());
+            parameterArgs_.setProperty(id, parameterData->getValue());
         }
     }
     for (int i = 0; i < numInputs_; i++) {

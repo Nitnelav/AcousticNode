@@ -17,7 +17,7 @@ private:
     std::shared_ptr<FloatData> floatData_;
 
 public:
-    FloatModuleData(const QString& description);
+    FloatModuleData(const QJSValue& element);
 
     QWidget* getWidget() const override;
     std::shared_ptr<NodeData> getNodeData() const override;

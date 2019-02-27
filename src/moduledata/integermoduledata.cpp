@@ -1,7 +1,7 @@
 #include "integermoduledata.h"
 
-IntegerModuleData::IntegerModuleData(const QString &description):
-    ModuleData (description)
+IntegerModuleData::IntegerModuleData(const QJSValue &element):
+    ModuleData (element)
 {
     spinBox_ = new QSpinBox();
     spinBox_->setRange(-32768, 32767);
@@ -25,10 +25,8 @@ void IntegerModuleData::setNodeData(const std::shared_ptr<QtNodes::NodeData> &no
     intData_ = std::static_pointer_cast<IntegerData>(nodeData);
     if (intData_) {
         spinBox_->setValue(intData_->number());
-        spinBox_->setDisabled(false);
     } else {
         spinBox_->setValue(0);
-        spinBox_->setDisabled(true);
     }
 }
 
@@ -50,7 +48,7 @@ void IntegerModuleData::setValue(const int &number)
 
 void IntegerModuleData::valueChanged(int number)
 {
-    if (number != intData_->number()) {
+    if (intData_ && number != intData_->number()) {
         intData_->setNumber(number);
         Q_EMIT widgetDataChanged();
     }

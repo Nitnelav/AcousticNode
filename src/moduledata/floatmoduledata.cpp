@@ -1,7 +1,7 @@
 #include "floatmoduledata.h"
 
-FloatModuleData::FloatModuleData(const QString &description):
-    ModuleData (description)
+FloatModuleData::FloatModuleData(const QJSValue &element):
+    ModuleData (element)
 {
     spinBox_ = new QDoubleSpinBox();
     spinBox_->setRange(-DBL_MAX, DBL_MAX);
@@ -25,10 +25,8 @@ void FloatModuleData::setNodeData(const std::shared_ptr<QtNodes::NodeData> &node
     floatData_ = std::static_pointer_cast<FloatData>(nodeData);
     if (floatData_) {
         spinBox_->setValue(floatData_->number());
-        spinBox_->setDisabled(false);
     } else {
         spinBox_->setValue(0.0);
-        spinBox_->setDisabled(true);
     }
 }
 
@@ -50,7 +48,7 @@ void FloatModuleData::setValue(const double &number)
 
 void FloatModuleData::valueChanged(double number)
 {
-    if (number != floatData_->number()) {
+    if (floatData_ && number != floatData_->number()) {
         floatData_->setNumber(number);
         Q_EMIT widgetDataChanged();
     }

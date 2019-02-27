@@ -7,15 +7,16 @@ export const inputs = [
 ];
 
 export const parameters = [
-    { type: 'spectrum', typeName: "Lw", description: 'Output Lw'},
+    { id: "param1", type: 'spectrum', typeName: "Lw", description: 'Output Lw'},
 ];
 
 export const outputs = [
-    { type: 'spectrum', typeName: "Lw", description: 'Output Lw' },
+    { id: "out1", type: 'spectrum', typeName: "Lw", description: 'Output Lw' },
 ];
 
 export function calculate (inputs, parameters) {
-    var outputLw = parameters[0];
-    return [ outputLw ];
+    var outputs = {};
+    outputs["out1"] = parameters["param1"];
+    return outputs;
 };
 
