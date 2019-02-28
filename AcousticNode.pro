@@ -127,7 +127,8 @@ HEADERS += \
 FORMS += \
         src/mainwindow.ui
 
-RESOURCES += externals/nodeeditor/resources/resources.qrc
+RESOURCES += \
+    resources/resources.qrc
 
 #LIBS += -lnodesdebug
 #LIBS += -LC:\Users\valen\Documents\GitHub\AcousticNode\externals\nodeeditor\Mingw64bit\lib
@@ -141,4 +142,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    modules/*
+    modules/* \

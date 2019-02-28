@@ -267,7 +267,6 @@ void ScriptWrapperModel::setInData(std::shared_ptr<QtNodes::NodeData> data, QtNo
     calculate();
 }
 
-
 void ScriptWrapperModel::setupDockWidget()
 {
     QVBoxLayout* mainLayout = new QVBoxLayout();

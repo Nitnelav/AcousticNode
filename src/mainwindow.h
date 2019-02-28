@@ -14,6 +14,7 @@
 #include <QSettings>
 #include <QFileDialog>
 #include <QtCharts/QChart>
+#include <QMessageBox>
 
 #include <Node>
 #include <NodeData>
@@ -58,7 +59,15 @@ private:
     QMap<QUuid, NodeDockWidget*> nodeDocks_;
 
     QString currentProject_;
-    bool isModified;
+    QAction* recentFileActs_[MAX_RECENT_FILES];
+
+    void setCurrentFile(const QString &fileName);
+    void updateRecentFileActions();
+
+    QString strippedName(const QString &fullFileName)
+    {
+        return QFileInfo(fullFileName).fileName();
+    }
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);

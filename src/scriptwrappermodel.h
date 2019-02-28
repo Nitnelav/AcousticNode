@@ -17,7 +17,7 @@
 #include <QGroupBox>
 #include <QSplitter>
 #include <QJsonArray>
-#include <QJsonObject>>
+#include <QJsonObject>
 #include <QJsonValue>
 
 #include <NodeDataModel>
@@ -40,6 +40,7 @@ using QtNodes::NodeData;
 using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
+using QtNodes::NodePainterDelegate;
 
 class ScriptWrapperModel : public NodeDataModel
 {

@@ -8,7 +8,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_(new Ui::MainWindow)
 {
     QCoreApplication::setApplicationName("AcousticNode");
-
     ui_->setupUi(this);
 
     js_ = new QJSEngine();
@@ -34,18 +33,26 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     )");
 
+    setWindowTitle("AcousticNode - new_project.node[*]");
+    setWindowModified(true);
+
     connect(flowScene_, &FlowScene::nodeCreated, this, &MainWindow::nodeCreated);
     connect(flowScene_, &FlowScene::nodeDeleted, this, &MainWindow::nodeDeleted);
     connect(flowScene_, &FlowScene::nodeContextMenu, this, &MainWindow::nodeContextMenu);
     connect(flowScene_, &FlowScene::selectionChanged, this, &MainWindow::selectionChanged);
     connect(flowScene_, &FlowScene::nodeDoubleClicked, this, &MainWindow::nodeLocked);
 
-//    QSettings settings;
-//    QStringList recentFilePaths = settings.value("recentProjects").toStringList();
-//    int numRecentFiles = qMin(recentFilePaths.size(), MAX_RECENT_FILES);
-//    for (int i = 0; i < numRecentFiles; i++) {
-//        ui_->menuRecentProject->addAction(new QAction(recentFilePaths))
-//    }
+    QSettings settings("config.ini", QSettings::IniFormat);
+    qDebug() << settings.fileName();
+    QStringList recentFilePaths = settings.value("recentProjects").toStringList();
+    for (int i = 0; i < MAX_RECENT_FILES; ++i) {
+        recentFileActs_[i] = new QAction(this);
+        recentFileActs_[i]->setVisible(false);
+        ui_->menuRecentProjects->addAction(recentFileActs_[i]);
+        connect(recentFileActs_[i], &QAction::triggered, this, &MainWindow::openRecentProject);
+    }
+    updateRecentFileActions();
+
     connect(ui_->actionSave, &QAction::triggered, this, &MainWindow::save);
     connect(ui_->actionSaveAs, &QAction::triggered, this, &MainWindow::saveAs);
     connect(ui_->actionNewProject, &QAction::triggered, this, &MainWindow::newProject);
@@ -67,6 +74,7 @@ void MainWindow::nodeLocked(Node &node)
 
 void MainWindow::nodeCreated(Node &node)
 {
+    setWindowModified(true);
     ScriptWrapperModel* nodeModel = static_cast<ScriptWrapperModel*>(node.nodeDataModel());
     selectedNode_ = &node;
     ui_->dockWidget->setWidget(nodeModel->getDockWidget());
@@ -75,6 +83,7 @@ void MainWindow::nodeCreated(Node &node)
 
 void MainWindow::nodeDeleted(Node &node)
 {
+    setWindowModified(true);
     if (&node == selectedNode_) {
         selectedNode_ = nullptr;
         ui_->dockWidget->setWidget(ui_->defaultDock);
@@ -148,10 +157,10 @@ void MainWindow::save()
         return saveAs();
     }
     QFile file(currentProject_);
-    if (file.open(QIODevice::WriteOnly))
-    {
+    if (file.open(QIODevice::WriteOnly)) {
         file.write(flowScene_->saveToMemory());
     }
+    setWindowModified(false);
 }
 
 void MainWindow::saveAs()
@@ -162,48 +171,149 @@ void MainWindow::saveAs()
                                    QDir::homePath(),
                                    tr("AcousticNode Projects (*.node)"));
 
-    if (!fileName.isEmpty())
-    {
-        if (!fileName.endsWith("node", Qt::CaseInsensitive))
-            fileName += ".node";
-
-        currentProject_ = fileName;
-        QFile file(fileName);
-        if (file.open(QIODevice::WriteOnly))
-        {
-            file.write(flowScene_->saveToMemory());
-        }
+    if (fileName.isEmpty()) {
+        return;
     }
+    if (!fileName.endsWith("node", Qt::CaseInsensitive)) {
+        fileName += ".node";
+    }
+    QFile file(fileName);
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(flowScene_->saveToMemory());
+    }
+    setCurrentFile(fileName);
+    setWindowTitle(QString("AcousticNode - %1[*]").arg(currentProject_));
+    setWindowModified(false);
 }
 
 void MainWindow::newProject()
 {
-
+    if (isWindowModified()) {
+        QMessageBox msgBox;
+        msgBox.setText("The project has been modified.");
+        msgBox.setInformativeText("Do you want to save your work before closing the current Project ?");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        msgBox.exec();
+        int ret = msgBox.exec();
+        switch (ret) {
+        case QMessageBox::Save:
+            save();
+            break;
+        case QMessageBox::Discard:
+            // Don't Save was clicked
+            break;
+        case QMessageBox::Cancel:
+            return;
+        default:
+            break;
+      }
+    }
+    flowScene_->clearScene();
+    currentProject_ = QString();
+    setWindowTitle(QString("AcousticNode - new_project[*]").arg(currentProject_));
+    setWindowModified(false);
 }
 
 void MainWindow::openProject()
 {
+    if (isWindowModified()) {
+        QMessageBox msgBox;
+        msgBox.setText("The project has been modified.");
+        msgBox.setInformativeText("Do you want to save your work before closing the current Project ?");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+        switch (ret) {
+            case QMessageBox::Save:
+                save();
+                break;
+            case QMessageBox::Discard:
+                // Don't Save was clicked
+                break;
+            case QMessageBox::Cancel:
+                return;
+            default:
+                break;
+        }
+    }
     QString fileName =
       QFileDialog::getOpenFileName(nullptr,
                                    tr("Open AcousticNode Project"),
                                    QDir::homePath(),
                                    tr("AcousticNode Projects (*.node)"));
 
-    if (!QFileInfo::exists(fileName))
-      return;
-
+    if (!QFileInfo::exists(fileName)) {
+        return;
+    }
     QFile file(fileName);
-
-    if (!file.open(QIODevice::ReadOnly))
-      return;
-
+    if (!file.open(QIODevice::ReadOnly)) {
+        return;
+    }
     QByteArray wholeFile = file.readAll();
 
     flowScene_->clearScene();
     flowScene_->loadFromMemory(wholeFile);
+    setCurrentFile(fileName);
+    setWindowTitle(QString("AcousticNode - %1[*]").arg(currentProject_));
+    setWindowModified(false);
 }
 
 void MainWindow::openRecentProject()
 {
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action) {
+        QString fileName = action->data().toString();
+        if (!QFileInfo::exists(fileName)) {
+            return;
+        }
+        QFile file(fileName);
+        if (!file.open(QIODevice::ReadOnly)) {
+            return;
+        }
+        QByteArray wholeFile = file.readAll();
 
+        flowScene_->clearScene();
+        flowScene_->loadFromMemory(wholeFile);
+        setCurrentFile(fileName);
+        setWindowTitle(QString("AcousticNode - %1[*]").arg(currentProject_));
+        setWindowModified(false);
+    }
+}
+
+void MainWindow::setCurrentFile(const QString &fileName)
+{
+    currentProject_ = fileName;
+    setWindowFilePath(currentProject_);
+
+    QSettings settings("config.ini", QSettings::IniFormat);
+    QStringList files = settings.value("recentProjects").toStringList();
+    files.removeAll(fileName);
+    files.prepend(fileName);
+    while (files.size() > MAX_RECENT_FILES) {
+        files.removeLast();
+    }
+
+    settings.setValue("recentProjects", files);
+
+    updateRecentFileActions();
+}
+
+void MainWindow::updateRecentFileActions()
+{
+    QSettings settings("config.ini", QSettings::IniFormat);
+    QStringList files = settings.value("recentProjects").toStringList();
+    qDebug() << settings.fileName();
+    qDebug() << files;
+    int numRecentFiles = qMin(files.size(), MAX_RECENT_FILES);
+
+    for (int i = 0; i < numRecentFiles; ++i) {
+        QString text = tr("%1").arg(strippedName(files[i]));
+        recentFileActs_[i]->setText(text);
+        recentFileActs_[i]->setData(files[i]);
+        recentFileActs_[i]->setVisible(true);
+    }
+    for (int j = numRecentFiles; j < MAX_RECENT_FILES; ++j) {
+        recentFileActs_[j]->setVisible(false);
+    }
 }
