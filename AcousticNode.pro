@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui qml opengl charts
+QT       += core gui qml opengl charts sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -58,7 +58,8 @@ SOURCES += \
     src/moduledata/booleanmoduledata.cpp \
     src/moduledata/floatmoduledata.cpp \
     src/moduledata/integermoduledata.cpp \
-    src/nodedockwidget.cpp
+    src/nodedockwidget.cpp \
+    src/dbmanager.cpp
 
 HEADERS += \
     src/mainwindow.h \
@@ -122,10 +123,12 @@ HEADERS += \
     src/moduledata/booleanmoduledata.h \
     src/moduledata/floatmoduledata.h \
     src/moduledata/integermoduledata.h \
-    src/nodedockwidget.h
+    src/nodedockwidget.h \
+    src/dbmanager.h
 
 FORMS += \
-        src/mainwindow.ui
+        src/mainwindow.ui \
+    src/dbsearch.ui
 
 RESOURCES += \
     resources/resources.qrc

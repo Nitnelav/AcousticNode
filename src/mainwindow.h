@@ -26,6 +26,7 @@
 #include "nodedockwidget.h"
 #include "scriptwrappermodel.h"
 #include "modulemanager.h"
+#include "dbmanager.h"
 #include "modulegraph.h"
 
 using namespace QtCharts;
@@ -51,6 +52,7 @@ private:
 
     QJSEngine* js_;
     ModuleManager* moduleMgr_;
+    DbManager* dbMgr_;
 
     Node* selectedNode_;
     Node* lockedNode_;
@@ -88,6 +90,8 @@ private slots:
     void newProject();
     void openProject();
     void openRecentProject();
+
+    void browseDb();
 };
 
 #endif // MAINWINDOW_H

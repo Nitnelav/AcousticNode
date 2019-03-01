@@ -94,7 +94,7 @@
     <addaction name="actionDBAddCategory"/>
     <addaction name="actionDBAddElement"/>
     <addaction name="separator"/>
-    <addaction name="actionBrowse"/>
+    <addaction name="actionDBBrowse"/>
    </widget>
    <widget class="QMenu" name="menuNodes">
     <property name="title">
@@ -238,7 +238,7 @@
     <string>Add Element...</string>
    </property>
   </action>
-  <action name="actionBrowse">
+  <action name="actionDBBrowse">
    <property name="text">
     <string>Browse...</string>
    </property>

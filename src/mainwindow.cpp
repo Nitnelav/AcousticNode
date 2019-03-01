@@ -15,6 +15,9 @@ MainWindow::MainWindow(QWidget *parent) :
     moduleMgr_->setModulesDir("C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\modules");
     moduleMgr_->loadModules();
 
+    dbMgr_ = new DbManager();
+    dbMgr_->addDb("C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\database.db", "Local DataBase");
+
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
     setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
@@ -57,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui_->actionSaveAs, &QAction::triggered, this, &MainWindow::saveAs);
     connect(ui_->actionNewProject, &QAction::triggered, this, &MainWindow::newProject);
     connect(ui_->actionOpenProject, &QAction::triggered, this, &MainWindow::openProject);
+    connect(ui_->actionDBBrowse, &QAction::triggered, this, &MainWindow::browseDb);
 }
 
 MainWindow::~MainWindow()
@@ -279,6 +283,11 @@ void MainWindow::openRecentProject()
         setWindowTitle(QString("AcousticNode - %1[*]").arg(currentProject_));
         setWindowModified(false);
     }
+}
+
+void MainWindow::browseDb()
+{
+    dbMgr_->getSearchDialog()->open();
 }
 
 void MainWindow::setCurrentFile(const QString &fileName)
