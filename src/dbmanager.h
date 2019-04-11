@@ -1,14 +1,19 @@
 #ifndef DBMANAGER_H
 #define DBMANAGER_H
 
+#include <memory>
+
 #include <QObject>
 #include <QDialog>
 #include <QSettings>
 #include <QSqlDatabase>
 #include <QSqlRecord>
 #include <QSqlQueryModel>
+#include <QAbstractButton>
+#include <QModelIndex>
 
 #include "ui_dbsearch.h"
+#include "moduledata/spectrummoduledata.h"
 
 class DbManager : public QObject
 {
@@ -28,6 +33,7 @@ public:
     void removeDb(const QString &name);
 
     QDialog* getSearchDialog();
+    void setFromDb(std::shared_ptr<SpectrumModuleData> module);
 
 public slots:
     void changeDb(const QString& dbName);

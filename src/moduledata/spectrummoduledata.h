@@ -33,10 +33,12 @@ public:
     void setValue(int freq, double value);
 
 signals:
+    void contextMenuRequested(const QPoint& pos, SpectrumModuleData* spectrumModuleData);
 
 public slots:
 
     void cellChanged(int row, int freq);
+    void widgetContextMenuRequested(const QPoint& pos);
 
 };
 

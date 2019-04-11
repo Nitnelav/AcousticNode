@@ -1,7 +1,8 @@
 #include "scriptwrappermodel.h"
 
-ScriptWrapperModel::ScriptWrapperModel(QJSEngine* engine, QString path):
+ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString path):
     js_(engine),
+    db_(db),
     path_(path)
 {
     dockWidget_ = new QWidget();
@@ -271,6 +272,8 @@ void ScriptWrapperModel::setupDockWidget()
 {
     QVBoxLayout* mainLayout = new QVBoxLayout();
 
+    QTabWidget* tabWidget = new QTabWidget();
+
     QFrame* infoFrame = new QFrame();
     QFormLayout* infoLayout = new QFormLayout();
     infoLayout->setRowWrapPolicy(QFormLayout::WrapAllRows);
@@ -282,6 +285,8 @@ void ScriptWrapperModel::setupDockWidget()
     descriptionEdit->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     descriptionEdit->setPlainText(description_);
     infoLayout->addRow("Description", descriptionEdit);
+
+
 
     QFrame* dataFrame = new QFrame();
     QVBoxLayout* dataLayout = new QVBoxLayout();
@@ -311,6 +316,10 @@ void ScriptWrapperModel::setupDockWidget()
             QWidget* widget = parameters_[index]->getWidget();
             parameterLayout->addRow(parameters_[index]->description(), widget);
             widget->show();
+            if (parameters_[index]->type() == "spectrum") {
+                SpectrumModuleData* specrtumModuleData = static_cast<SpectrumModuleData*>(parameters_[index].get());
+                connect(specrtumModuleData, &SpectrumModuleData::contextMenuRequested, this, &ScriptWrapperModel::spectrumContextMenu);
+            }
         }
     }
 
@@ -328,20 +337,29 @@ void ScriptWrapperModel::setupDockWidget()
         }
     }
 
+    dataLayout->addStretch(1);
+
     moduleChartView_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     moduleChartView_->setContextMenuPolicy(Qt::CustomContextMenu);
     moduleChartView_->setChart(moduleChart_);
     connect(moduleChartView_, &QChartView::customContextMenuRequested, this, &ScriptWrapperModel::graphContextMenu);
 
-    QSplitter* splitter = new QSplitter(Qt::Vertical);
-    splitter->addWidget(infoFrame);
-    splitter->addWidget(dataFrame);
-    splitter->addWidget(moduleChartView_);
-    splitter->setStretchFactor(1, 0);
-    splitter->setStretchFactor(2, 2);
+    tabWidget->addTab(infoFrame, "Info");
+    tabWidget->addTab(dataFrame, "Parameters");
+    tabWidget->addTab(moduleChartView_, "Graph");
 
-    mainLayout->addWidget(splitter);
+    mainLayout->addWidget(tabWidget);
     dockWidget_->setLayout(mainLayout);
+
+//    QSplitter* splitter = new QSplitter(Qt::Vertical);
+//    splitter->addWidget(infoFrame);
+//    splitter->addWidget(dataFrame);
+//    splitter->addWidget(moduleChartView_);
+//    splitter->setStretchFactor(1, 0);
+//    splitter->setStretchFactor(2, 2);
+
+//    mainLayout->addWidget(splitter);
+//    dockWidget_->setLayout(mainLayout);
 }
 
 void ScriptWrapperModel::calculate()
@@ -607,6 +625,13 @@ void ScriptWrapperModel::graphContextMenu(const QPoint &pos)
         action->setProperty("barSetIndex", index);
         connect(action, &QAction::toggled, this, &ScriptWrapperModel::toggleBarSet);
     }
+    menu->addSeparator();
+
+    QAction* action = menu->addAction("Show NR curves");
+    action->setCheckable(true);
+    action->setChecked(moduleChart_->isNRVisible());
+    connect(action, &QAction::toggled, this, &ScriptWrapperModel::toggleNR);
+
     menu->popup(moduleChartView_->mapToGlobal(pos));
     connect(menu, &QMenu::aboutToHide, menu, &QMenu::deleteLater);
 }
@@ -622,4 +647,36 @@ void ScriptWrapperModel::toggleBarSet()
     } else {
         moduleChart_->hideBarSet(set);
     }
+}
+
+void ScriptWrapperModel::toggleNR()
+{
+    if (moduleChart_->isNRVisible()) {
+        moduleChart_->hideNR();
+    } else {
+        moduleChart_->showNR();
+    }
+}
+
+void ScriptWrapperModel::spectrumContextMenu(const QPoint &pos, SpectrumModuleData* spectrumModuleData)
+{
+    QMenu* menu = new QMenu();
+    QAction* action = menu->addAction("Set from database...");
+    for (int index = 0; index < numInputs_; index++) {
+        if (parameters_[index].get() == spectrumModuleData) {
+            action->setProperty("parameterIndex", index);
+        }
+    }
+    connect(action, &QAction::triggered, this, &ScriptWrapperModel::setFromDb);
+    QPoint global = spectrumModuleData->getWidget()->mapToGlobal(pos);
+    menu->popup(global);
+    connect(menu, &QMenu::aboutToHide, menu, &QMenu::deleteLater);
+}
+
+void ScriptWrapperModel::setFromDb()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    int parameterIndex = action->property("parameterIndex").toInt();
+    auto spectrumModelData = std::static_pointer_cast<SpectrumModuleData>(parameters_[parameterIndex]);
+    db_->setFromDb(spectrumModelData);
 }

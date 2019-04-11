@@ -60,6 +60,41 @@ QDialog *DbManager::getSearchDialog()
     return searchDialog_;
 }
 
+void DbManager::setFromDb(std::shared_ptr<SpectrumModuleData> module)
+{
+    connect(searchDialogUi_->buttonBox, &QDialogButtonBox::clicked, this, [=](QAbstractButton* button) {
+        auto role = searchDialogUi_->buttonBox->buttonRole(button);
+        switch (role) {
+        case (QDialogButtonBox::ButtonRole::AcceptRole) :
+        {
+            int row = searchDialogUi_->tableView->selectionModel()->selectedRows()[0].row();
+            auto sqlModel = static_cast<QSqlQueryModel*>(searchDialogUi_->tableView->model());
+            QSqlRecord record = sqlModel->record(row);
+            for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; freq++) {
+                double value = record.value(freq+1).toString().replace(",", ".").toDouble();
+                module->setValue(freq, value);
+            }
+            break;
+        }
+        case (QDialogButtonBox::ButtonRole::ApplyRole) :
+        {
+            int row = searchDialogUi_->tableView->selectionModel()->selectedRows()[0].row();
+            auto sqlModel = static_cast<QSqlQueryModel*>(searchDialogUi_->tableView->model());
+            QSqlRecord record = sqlModel->record(row);
+            for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; freq++) {
+                double value = record.value(freq+1).toString().replace(",", ".").toDouble();
+                module->setValue(freq, value);
+            }
+            break;
+        }
+        default:
+            break;
+        }
+    });
+    searchDialog_->exec();
+    disconnect(searchDialogUi_->buttonBox, &QDialogButtonBox::clicked, this, nullptr);
+}
+
 void DbManager::changeDb(const QString &dbName)
 {
     currentDbName_ = dbName;

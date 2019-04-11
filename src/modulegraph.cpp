@@ -16,6 +16,7 @@ ModuleGraph::ModuleGraph():
     freqAxis_->append(categories);
     freqAxis_->setTitleText("Hz");
     addAxis(freqAxis_, Qt::AlignBottom);
+
     barSeries_->attachAxis(freqAxis_);
 
     levelAxis_ = new QValueAxis();
@@ -25,7 +26,27 @@ ModuleGraph::ModuleGraph():
     addAxis(levelAxis_, Qt::AlignLeft);
     levelAxis_->setRange(0.0, 5.0);
     levelAxis_->setTickInterval(1.0);
+
     barSeries_->attachAxis(levelAxis_);
+
+    QList<double> NR0 = {35.5, 22, 12, 4.8, 0, -3.5, -6.1, -8};
+    QList<double> NR_coeff = {0.79, 0.87, 0.93, 0.974, 1, 1.015, 1.025, 1.03};
+
+    for (int nr = 10; nr <= 80; nr += 10) {
+        QLineSeries* nrSerie = new QLineSeries();
+        for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; freq++) {
+            nrSerie->append(freq, NR0[freq] + NR_coeff[freq] * nr);
+        }
+        QPen pen(Qt::gray);
+        pen.setWidth(2);
+        nrSerie->setPen(pen);
+        addSeries(nrSerie);
+        nrSerie->attachAxis(freqAxis_);
+        nrSerie->attachAxis(levelAxis_);
+        legend()->markers(nrSerie)[0]->setVisible(false);
+        nrSeriesList_.append(nrSerie);
+    }
+    hideNR();
 }
 
 void ModuleGraph::appendSpectrumData(std::shared_ptr<SpectrumModuleData> data)
@@ -58,6 +79,25 @@ void ModuleGraph::hideBarSet(QBarSet *set)
     }
 }
 
+void ModuleGraph::showNR()
+{
+    foreach (QLineSeries* serie, nrSeriesList_) {
+        serie->show();
+        legend()->markers(serie)[0]->setVisible(false);
+    }
+}
+
+void ModuleGraph::hideNR()
+{
+    foreach (QLineSeries* serie, nrSeriesList_) {
+        serie->hide();
+    }
+}
+
+bool ModuleGraph::isNRVisible()
+{
+    return nrSeriesList_[0]->isVisible();
+}
 
 
 void ModuleGraph::valueChanged(int)

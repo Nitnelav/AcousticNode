@@ -26,6 +26,7 @@
 #include <NodeStyle>
 #include <NodePainterDelegate>
 
+#include "dbmanager.h"
 #include "moduleexceptions.h"
 #include "modulegraph.h"
 #include "moduledata/moduledata.h"
@@ -48,6 +49,7 @@ class ScriptWrapperModel : public NodeDataModel
 
 private:
     QJSEngine* js_;
+    DbManager* db_;
     QString path_;
     QJSValue module_;
 
@@ -82,7 +84,7 @@ private:
     void calculate();
 
 public:
-    ScriptWrapperModel(QJSEngine *engine, QString path);
+    ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString path);
     virtual ~ScriptWrapperModel() override;
 
     void setCaption(const QString& caption) { caption_ = caption; }
@@ -138,6 +140,9 @@ private slots:
     void parameterChanged();
     void graphContextMenu(const QPoint &pos);
     void toggleBarSet();
+    void toggleNR();
+    void spectrumContextMenu(const QPoint &pos, SpectrumModuleData* spectrumModuleData);
+    void setFromDb();
 
 };
 

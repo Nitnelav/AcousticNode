@@ -11,8 +11,10 @@ SpectrumModuleData::SpectrumModuleData(const QJSValue &element) : ModuleData (el
     tableWidget_->verticalHeader()->hide();
     tableWidget_->resizeColumnsToContents();
     tableWidget_->setMaximumHeight(70);
+    tableWidget_->setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(tableWidget_, &QTableWidget::cellChanged, this, &SpectrumModuleData::cellChanged);
+    connect(tableWidget_, &QTableWidget::customContextMenuRequested, this, &SpectrumModuleData::widgetContextMenuRequested);
 
 }
 
@@ -56,6 +58,7 @@ void SpectrumModuleData::setValue(int freq, double value)
         spectrumData_->setValue(freq, value);
         barSet_->replace(freq, value);
         tableWidget_->item(0, freq)->setText(QString::number(value));
+        Q_EMIT widgetDataChanged();
     }
 }
 void SpectrumModuleData::cellChanged(int row, int freq)
@@ -71,4 +74,9 @@ void SpectrumModuleData::cellChanged(int row, int freq)
         barSet_->replace(freq, value);
         Q_EMIT widgetDataChanged();
     }
+}
+
+void SpectrumModuleData::widgetContextMenuRequested(const QPoint &pos)
+{
+    Q_EMIT contextMenuRequested(pos, this);
 }

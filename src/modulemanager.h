@@ -8,6 +8,7 @@
 
 #include <DataModelRegistry>
 
+#include "dbmanager.h"
 #include "scriptwrappermodel.h"
 #include "moduleexceptions.h"
 
@@ -18,13 +19,14 @@ class ModuleManager
 
 private:
     QJSEngine* js_;
+    DbManager* db_;
     QDir modulesDir_;
     QStringList validModules_;
 
     void moduleValidator(QDir &dir);
 
 public:
-    ModuleManager(QJSEngine *js);
+    ModuleManager(QJSEngine *js, DbManager *db);
 
     std::shared_ptr<DataModelRegistry> getModuleRegistry();
 

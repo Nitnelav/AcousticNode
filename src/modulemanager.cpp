@@ -2,8 +2,9 @@
 
 #include <QDebug>
 
-ModuleManager::ModuleManager(QJSEngine *js):
-    js_(js)
+ModuleManager::ModuleManager(QJSEngine *js, DbManager* db):
+    js_(js),
+    db_(db)
 {
 
 }
@@ -48,9 +49,10 @@ std::shared_ptr<DataModelRegistry> ModuleManager::getModuleRegistry()
 {
     auto ret = std::make_shared<DataModelRegistry>();
     QJSEngine* js = js_;
+    DbManager* db = db_;
     foreach (QString path, validModules_) {
-        auto creator = [js, path]() {
-            return std::make_unique<ScriptWrapperModel>(js, path);
+        auto creator = [js, db, path]() {
+            return std::make_unique<ScriptWrapperModel>(js, db, path);
         };
         ret->registerModel<ScriptWrapperModel>(std::move(creator));
     }

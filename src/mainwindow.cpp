@@ -10,13 +10,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QCoreApplication::setApplicationName("AcousticNode");
     ui_->setupUi(this);
 
-    js_ = new QJSEngine();
-    moduleMgr_ = new ModuleManager(js_);
-    moduleMgr_->setModulesDir("C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\modules");
-    moduleMgr_->loadModules();
-
     dbMgr_ = new DbManager();
     dbMgr_->addDb("C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\database.db", "Local DataBase");
+
+    js_ = new QJSEngine();
+    moduleMgr_ = new ModuleManager(js_, dbMgr_);
+    moduleMgr_->setModulesDir("C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\modules");
+    moduleMgr_->loadModules();
 
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
