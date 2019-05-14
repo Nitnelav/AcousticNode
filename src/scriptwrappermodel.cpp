@@ -101,6 +101,13 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
             connect(floatModuleData.get(), &FloatModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
             parameters_.append(floatModuleData);
             parameterArgs_.setProperty(floatModuleData->id(), floatData->number());
+        } else if (type == "choice") {
+            auto choiceModuleData = std::make_shared<ChoiceModuleData>(element);
+            auto choiceData = std::make_shared<ChoiceData>();
+            choiceModuleData->setNodeData(choiceData);
+            connect(choiceModuleData.get(), &ChoiceModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
+            parameters_.append(choiceModuleData);
+            parameterArgs_.setProperty(choiceModuleData->id(), choiceData->string());
         } else {
             parameters_.append(nullptr);
         }
@@ -602,13 +609,12 @@ void ScriptWrapperModel::parameterChanged()
         } else if (type == "float") {
             auto parameterData = std::static_pointer_cast<FloatModuleData>(parameters_[index]);
             parameterArgs_.setProperty(id, parameterData->getValue());
+        } else if (type == "choice") {
+            auto parameterData = std::static_pointer_cast<ChoiceModuleData>(parameters_[index]);
+            parameterArgs_.setProperty(id, parameterData->getString());
         }
     }
-    for (int i = 0; i < numInputs_; i++) {
-        if (!inputs_[i]->getNodeData()) {
-            return; // TODO : take "required" parameter into account
-        }
-    }
+
     calculate();
 }
 

@@ -34,6 +34,7 @@
 #include "moduledata/floatmoduledata.h"
 #include "moduledata/integermoduledata.h"
 #include "moduledata/booleanmoduledata.h"
+#include "moduledata/choicemoduledata.h"
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;

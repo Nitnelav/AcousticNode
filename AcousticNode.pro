@@ -59,7 +59,8 @@ SOURCES += \
     src/moduledata/floatmoduledata.cpp \
     src/moduledata/integermoduledata.cpp \
     src/nodedockwidget.cpp \
-    src/dbmanager.cpp
+    src/dbmanager.cpp \
+    src/moduledata/choicemoduledata.cpp
 
 HEADERS += \
     src/mainwindow.h \
@@ -124,7 +125,9 @@ HEADERS += \
     src/moduledata/floatmoduledata.h \
     src/moduledata/integermoduledata.h \
     src/nodedockwidget.h \
-    src/dbmanager.h
+    src/dbmanager.h \
+    src/moduledata/choicemoduledata.h \
+    src/moduledata/choicedata.h
 
 FORMS += \
         src/mainwindow.ui \
