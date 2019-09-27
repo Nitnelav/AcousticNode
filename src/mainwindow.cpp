@@ -27,14 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     flowScene_->setRegistry(moduleMgr_->getModuleRegistry());
     ui_->flowView->setScene(flowScene_);
 
-    ConnectionStyle::setConnectionStyle(
-    R"(
-    {
-      "ConnectionStyle": {
-        "UseDataDefinedColors": true
-      }
-    }
-    )");
+    setStyles();
 
     setWindowTitle("AcousticNode - new_project.node[*]");
     setWindowModified(true);
@@ -61,6 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui_->actionNewProject, &QAction::triggered, this, &MainWindow::newProject);
     connect(ui_->actionOpenProject, &QAction::triggered, this, &MainWindow::openProject);
     connect(ui_->actionDBBrowse, &QAction::triggered, this, &MainWindow::browseDb);
+    connect(ui_->actionQuit, &QAction::triggered, this, &MainWindow::close);
 }
 
 MainWindow::~MainWindow()
@@ -71,9 +65,40 @@ MainWindow::~MainWindow()
     delete ui_;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (isWindowModified()) {
+        QMessageBox msgBox;
+        msgBox.setText("The project has been modified.");
+        msgBox.setInformativeText("Do you want to save your work before closing the current Project ?");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+        switch (ret) {
+            case QMessageBox::Save:
+                if (save()) {
+                    event->accept();
+                } else {
+                    event->ignore();
+                }
+                break;
+            case QMessageBox::Discard:
+                event->accept();
+                break;
+            case QMessageBox::Cancel:
+                event->ignore();
+                break;
+            default:
+                break;
+        }
+    } else {
+        event->accept();
+    }
+}
+
 void MainWindow::nodeLocked(Node &node)
 {
-
+//    node.nodeDataModel()->setNodeStyle(style);
 }
 
 void MainWindow::nodeCreated(Node &node)
@@ -144,6 +169,7 @@ void MainWindow::nodeContextMenu(Node &n, const QPointF &pos)
         } else {
             tabifyDockWidget(nodeDocks_.last(), newDock);
         }
+        nodeModel->setNodeStyle(dockedNodeStyle_);
         nodeDocks_[node->id()] = newDock;
     });
     menu->popup(ui_->flowView->mapToGlobal(ui_->flowView->mapFromScene(pos)));
@@ -152,10 +178,18 @@ void MainWindow::nodeContextMenu(Node &n, const QPointF &pos)
 
 void MainWindow::dockClosed(QUuid nodeId)
 {
+    flowScene_->clearSelection();
     nodeDocks_.remove(nodeId);
+    auto nodes = flowScene_->allNodes();
+    flowScene_->iterateOverNodes([=](Node* node) {
+        if (node->id() == nodeId) {
+            node->nodeDataModel()->setNodeStyle(normalNodeStyle_);
+            node->nodeGraphicsObject().update();
+        }
+    });
 }
 
-void MainWindow::save()
+bool MainWindow::save() // true = successful
 {
     if (currentProject_.isEmpty()) {
         return saveAs();
@@ -165,9 +199,10 @@ void MainWindow::save()
         file.write(flowScene_->saveToMemory());
     }
     setWindowModified(false);
+    return true;
 }
 
-void MainWindow::saveAs()
+bool MainWindow::saveAs() // true = successful
 {
     QString fileName =
       QFileDialog::getSaveFileName(nullptr,
@@ -176,7 +211,7 @@ void MainWindow::saveAs()
                                    tr("AcousticNode Projects (*.node)"));
 
     if (fileName.isEmpty()) {
-        return;
+        return false;
     }
     if (!fileName.endsWith("node", Qt::CaseInsensitive)) {
         fileName += ".node";
@@ -188,6 +223,8 @@ void MainWindow::saveAs()
     setCurrentFile(fileName);
     setWindowTitle(QString("AcousticNode - %1[*]").arg(currentProject_));
     setWindowModified(false);
+
+    return true;
 }
 
 void MainWindow::newProject()
@@ -198,20 +235,21 @@ void MainWindow::newProject()
         msgBox.setInformativeText("Do you want to save your work before closing the current Project ?");
         msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Save);
-        msgBox.exec();
         int ret = msgBox.exec();
         switch (ret) {
-        case QMessageBox::Save:
-            save();
-            break;
-        case QMessageBox::Discard:
-            // Don't Save was clicked
-            break;
-        case QMessageBox::Cancel:
-            return;
-        default:
-            break;
-      }
+            case QMessageBox::Save:
+                if (save()) {
+                    break;
+                } else {
+                    return;
+                }
+            case QMessageBox::Discard:
+                break;
+            case QMessageBox::Cancel:
+                return;
+            default:
+                break;
+        }
     }
     flowScene_->clearScene();
     currentProject_ = QString();
@@ -325,4 +363,71 @@ void MainWindow::updateRecentFileActions()
     for (int j = numRecentFiles; j < MAX_RECENT_FILES; ++j) {
         recentFileActs_[j]->setVisible(false);
     }
+}
+
+void MainWindow::setStyles()
+{
+
+    ConnectionStyle::setConnectionStyle(
+    R"(
+    {
+      "ConnectionStyle": {
+        "UseDataDefinedColors": true
+      }
+    }
+    )");
+
+    normalNodeStyle_ = NodeStyle(R"(
+    {
+        "NodeStyle": {
+         "NormalBoundaryColor": [255, 255, 255],
+         "SelectedBoundaryColor": [255, 165, 0],
+         "GradientColor0": "gray",
+         "GradientColor1": [80, 80, 80],
+         "GradientColor2": [64, 64, 64],
+         "GradientColor3": [58, 58, 58],
+         "ShadowColor": [20, 20, 20],
+         "FontColor" : "white",
+         "FontColorFaded" : "gray",
+         "ConnectionPointColor": [169, 169, 169],
+         "FilledConnectionPointColor": "cyan",
+         "ErrorColor": "red",
+         "WarningColor": [128, 128, 0],
+
+         "PenWidth": 1.0,
+         "HoveredPenWidth": 1.5,
+
+         "ConnectionPointDiameter": 8.0,
+
+         "Opacity": 0.8
+        }
+    }
+    )");
+
+    dockedNodeStyle_ = NodeStyle(R"(
+    {
+        "NodeStyle": {
+         "NormalBoundaryColor": [0, 255, 255],
+         "SelectedBoundaryColor": [255, 165, 0],
+         "GradientColor0": "gray",
+         "GradientColor1": [80, 80, 80],
+         "GradientColor2": [64, 64, 64],
+         "GradientColor3": [58, 58, 58],
+         "ShadowColor": [20, 20, 20],
+         "FontColor" : "white",
+         "FontColorFaded" : "gray",
+         "ConnectionPointColor": [169, 169, 169],
+         "FilledConnectionPointColor": "cyan",
+         "ErrorColor": "red",
+         "WarningColor": [128, 128, 0],
+
+         "PenWidth": 1.0,
+         "HoveredPenWidth": 1.5,
+
+         "ConnectionPointDiameter": 8.0,
+
+         "Opacity": 0.8
+        }
+    }
+    )");
 }

@@ -18,6 +18,7 @@
 
 #include <Node>
 #include <NodeData>
+#include <NodeStyle>
 #include <FlowScene>
 #include <FlowView>
 #include <ConnectionStyle>
@@ -33,6 +34,7 @@ using namespace QtCharts;
 
 using QtNodes::DataModelRegistry;
 using QtNodes::Node;
+using QtNodes::NodeStyle;
 using QtNodes::FlowScene;
 using QtNodes::FlowView;
 using QtNodes::ConnectionStyle;
@@ -71,9 +73,18 @@ private:
         return QFileInfo(fullFileName).fileName();
     }
 
+    NodeStyle normalNodeStyle_;
+    NodeStyle dockedNodeStyle_;
+
+    void setStyles();
+
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+
+private:
+    void closeEvent(QCloseEvent *event);
 
 private slots:
     void nodeLocked(Node &node);
@@ -85,8 +96,8 @@ private slots:
 
     void dockClosed(QUuid nodeId);
 
-    void save();
-    void saveAs();
+    bool save(); // true = successful
+    bool saveAs(); // true = successful
     void newProject();
     void openProject();
     void openRecentProject();
