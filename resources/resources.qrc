@@ -278,5 +278,6 @@
         <file>icons/zoom-out.svg</file>
         <file>convert.png</file>
         <file>DefaultStyle.json</file>
+        <file>../logo/logo.ico</file>
     </qresource>
 </RCC>

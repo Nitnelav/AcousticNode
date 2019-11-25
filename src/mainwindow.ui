@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>AcousticNode</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources/resources.qrc">
+    <normaloff>:/logo/logo.ico</normaloff>:/logo/logo.ico</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
