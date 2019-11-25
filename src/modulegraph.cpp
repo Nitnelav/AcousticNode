@@ -51,6 +51,9 @@ ModuleGraph::ModuleGraph():
 
 void ModuleGraph::appendSpectrumData(std::shared_ptr<SpectrumModuleData> data)
 {
+    if (!data) {
+        return;
+    }
     barSeries_->append(data->getBarSet());
     barSetList_.append(data->getBarSet());
     connect(data->getBarSet(), &QBarSet::valueChanged, this, &ModuleGraph::valueChanged);
@@ -58,6 +61,12 @@ void ModuleGraph::appendSpectrumData(std::shared_ptr<SpectrumModuleData> data)
 
 void ModuleGraph::removeSpectrumData(std::shared_ptr<SpectrumModuleData> data)
 {
+    if (!data) {
+        return;
+    }
+    barSeries_->take(data->getBarSet());
+    barSetList_.removeOne(data->getBarSet());
+    disconnect(data->getBarSet(), nullptr, nullptr, nullptr);
 }
 
 bool ModuleGraph::isVisible(QBarSet *set)

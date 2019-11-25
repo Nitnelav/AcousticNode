@@ -26,7 +26,16 @@ CONFIG += c++14
 
 DEFINES += NODE_EDITOR_STATIC
 
+
+# QXlsx code for Application Qt project
+QXLSX_PARENTPATH=./externals/QXlsx        # current QXlsx path
+QXLSX_HEADERPATH=./externals/QXlsx/header/  # current QXlsx header path
+QXLSX_SOURCEPATH=./externals/QXlsx/source/  # current QXlsx source path
+include(./externals/QXlsx/QXlsx.pri)
+
+
 SOURCES += \
+    src/excelexporter.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/scriptwrappermodel.cpp \
@@ -63,6 +72,7 @@ SOURCES += \
     src/moduledata/choicemoduledata.cpp
 
 HEADERS += \
+    src/excelexporter.h \
     src/mainwindow.h \
     src/scriptwrappermodel.h \
     externals/nodeeditor/include/nodes/internal/Compiler.hpp \
@@ -139,8 +149,8 @@ RESOURCES += \
 #LIBS += -lnodesdebug
 #LIBS += -LC:\Users\valen\Documents\GitHub\AcousticNode\externals\nodeeditor\Mingw64bit\lib
 
-INCLUDEPATH += .\externals\nodeeditor\include\nodes
-INCLUDEPATH += .\externals\nodeeditor\include\nodes\internal
+INCLUDEPATH += ./externals/nodeeditor/include/nodes
+INCLUDEPATH += ./externals/nodeeditor/include/nodes/internal
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

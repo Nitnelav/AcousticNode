@@ -29,6 +29,7 @@
 #include "modulemanager.h"
 #include "dbmanager.h"
 #include "modulegraph.h"
+#include "excelexporter.h"
 
 using namespace QtCharts;
 
@@ -98,6 +99,7 @@ private slots:
 
     bool save(); // true = successful
     bool saveAs(); // true = successful
+    bool exportAs();
     void newProject();
     void openProject();
     void openRecentProject();

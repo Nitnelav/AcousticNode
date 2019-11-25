@@ -47,7 +47,6 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
         if (type == "spectrum") {
             auto spectrumModuleData = std::make_shared<SpectrumModuleData>(element);
             inputs_.append(spectrumModuleData);
-            moduleChart_->appendSpectrumData(spectrumModuleData);
         } else if (type == "int") {
             inputs_.append(std::make_shared<IntegerModuleData>(element));
         } else if (type == "bool") {
@@ -121,7 +120,6 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
         if (type == "spectrum") {
             auto spectrumData = std::make_shared<SpectrumModuleData>(element);
             outputs_.append(spectrumData);
-            moduleChart_->appendSpectrumData(spectrumData);
         } else if (type == "int") {
             outputs_.append(std::make_shared<IntegerModuleData>(element));
         } else if (type == "bool") {
@@ -227,10 +225,16 @@ void ScriptWrapperModel::setInData(std::shared_ptr<QtNodes::NodeData> data, QtNo
 
     if (!data) {
         inputs_[index]->setNodeData(nullptr);
+        if (type == "spectrum") {
+            auto inputModuleData = std::dynamic_pointer_cast<SpectrumModuleData>(inputs_[index]);
+            moduleChart_->removeSpectrumData(inputModuleData);
+        }
         if (required) {
             for (int outIndex = 0; outIndex < numOutputs_; ++outIndex) {
                 outputs_[outIndex]->setNodeData(nullptr);
                 Q_EMIT dataUpdated(outIndex);
+                auto ouput = std::dynamic_pointer_cast<SpectrumModuleData>(outputs_[outIndex]);
+                moduleChart_->removeSpectrumData(ouput);
             }
             validationState_ = NodeValidationState::Warning;
             validationMessage_ = QString("Missing or invalid inputs");
@@ -245,6 +249,7 @@ void ScriptWrapperModel::setInData(std::shared_ptr<QtNodes::NodeData> data, QtNo
         auto inputData = std::dynamic_pointer_cast<SpectrumData>(data);
         auto inputModuleData = std::dynamic_pointer_cast<SpectrumModuleData>(inputs_[index]);
         inputModuleData->setNodeData(inputData);
+        moduleChart_->appendSpectrumData(inputModuleData);
         QJSValue array = js_->newArray(8);
         for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; ++freq) {
             array.setProperty(freq, inputData->getValue(freq));
@@ -422,6 +427,7 @@ void ScriptWrapperModel::calculate()
             } else {
                 outputData = std::make_shared<SpectrumData>();
                 ouput->setNodeData(outputData);
+                moduleChart_->appendSpectrumData(ouput);
             }
             for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; ++freq) {
                 ouput->setValue(freq, result.property(id).property(freq).toNumber());
@@ -502,6 +508,41 @@ QJsonObject ScriptWrapperModel::save() const
     QJsonObject modelJson;
 
     modelJson["name"] = name();
+    modelJson["description"] = description();
+
+    QJsonObject inputsJson;
+
+    for (int index = 0; index < numInputs_; ++index) {
+        QJsonObject input;
+        QString type = inputs_[index]->type();
+        QString id = inputs_[index]->id();
+        input["type"] = type;
+        input["typeName"] = inputs_[index]->typeName();
+        input["description"] = inputs_[index]->description();
+        if (type == "spectrum") {
+            QJsonArray array;
+            auto inputData = std::static_pointer_cast<SpectrumModuleData>(inputs_[index]);
+            for (int freq = 0; freq < 8; ++freq) {
+                array.append(inputData->getValue(freq));
+            }
+            input["data"] = array;
+        } else if (type == "int") {
+            auto inputData = std::static_pointer_cast<IntegerModuleData>(inputs_[index]);
+            input["data"] = inputData->getValue();
+        } else if (type == "bool") {
+            auto inputData = std::static_pointer_cast<BooleanModuleData>(inputs_[index]);
+            input["data"] = inputData->getValue();
+        } else if (type == "float") {
+            auto inputData = std::static_pointer_cast<FloatModuleData>(inputs_[index]);
+            input["data"] = inputData->getValue();
+        } else if (type == "choice") {
+            auto inputData = std::static_pointer_cast<ChoiceModuleData>(inputs_[index]);
+            input["data"] = inputData->getString();
+        }
+        inputsJson[id] = input;
+    }
+
+    modelJson["inputs"] = inputsJson;
 
     QJsonObject parametersJson;
 
@@ -528,11 +569,48 @@ QJsonObject ScriptWrapperModel::save() const
         } else if (type == "float") {
             auto parameterData = std::static_pointer_cast<FloatModuleData>(parameters_[index]);
             parameter["data"] = parameterData->getValue();
+        } else if (type == "choice") {
+            auto parameterData = std::static_pointer_cast<ChoiceModuleData>(parameters_[index]);
+            parameter["data"] = parameterData->getString();
         }
         parametersJson[id] = parameter;
     }
 
     modelJson["parameters"] = parametersJson;
+
+    QJsonObject outputsJson;
+
+    for (int index = 0; index < numOutputs_; ++index) {
+        QJsonObject output;
+        QString type = outputs_[index]->type();
+        QString id = outputs_[index]->id();
+        output["type"] = type;
+        output["typeName"] = outputs_[index]->typeName();
+        output["description"] = outputs_[index]->description();
+        if (type == "spectrum") {
+            QJsonArray array;
+            auto outputData = std::static_pointer_cast<SpectrumModuleData>(outputs_[index]);
+            for (int freq = 0; freq < 8; ++freq) {
+                array.append(outputData->getValue(freq));
+            }
+            output["data"] = array;
+        } else if (type == "int") {
+            auto outputData = std::static_pointer_cast<IntegerModuleData>(outputs_[index]);
+            output["data"] = outputData->getValue();
+        } else if (type == "bool") {
+            auto outputData = std::static_pointer_cast<BooleanModuleData>(outputs_[index]);
+            output["data"] = outputData->getValue();
+        } else if (type == "float") {
+            auto outputData = std::static_pointer_cast<FloatModuleData>(outputs_[index]);
+            output["data"] = outputData->getValue();
+        } else if (type == "choice") {
+            auto outputData = std::static_pointer_cast<ChoiceModuleData>(outputs_[index]);
+            output["data"] = outputData->getString();
+        }
+        outputsJson[id] = output;
+    }
+
+    modelJson["outputs"] = outputsJson;
 
     return modelJson;
 }
@@ -625,6 +703,9 @@ void ScriptWrapperModel::graphContextMenu(const QPoint &pos)
 
     for (int index = 0; index < setList.size(); index++) {
         QBarSet* set = setList[index];
+        if (set->count() == 0) {
+            continue;
+        }
         QAction* action = menu->addAction(set->label());
         action->setCheckable(true);
         action->setChecked(moduleChart_->isVisible(set));
@@ -667,6 +748,25 @@ void ScriptWrapperModel::toggleNR()
 void ScriptWrapperModel::spectrumContextMenu(const QPoint &pos, SpectrumModuleData* spectrumModuleData)
 {
     QMenu* menu = new QMenu();
+    QAction* add_3_action = menu->addAction("add 3dB");
+    connect(add_3_action, &QAction::triggered, [=]() {
+        for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; freq++) {
+            spectrumModuleData->setValue(freq, spectrumModuleData->getValue(freq) + 3.0);
+        }
+    });
+    QAction* add_6_action = menu->addAction("add 6dB");
+    connect(add_6_action, &QAction::triggered, [=]() {
+        for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; freq++) {
+            spectrumModuleData->setValue(freq, spectrumModuleData->getValue(freq) + 6.0);
+        }
+    });
+    QAction* add_10_action = menu->addAction("add 10dB");
+    connect(add_10_action, &QAction::triggered, [=]() {
+        for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; freq++) {
+            spectrumModuleData->setValue(freq, spectrumModuleData->getValue(freq) + 10.0);
+        }
+    });
+    menu->addSeparator();
     QAction* action = menu->addAction("Set from database...");
     for (int index = 0; index < numInputs_; index++) {
         if (parameters_[index].get() == spectrumModuleData) {

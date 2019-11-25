@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui_->actionSave, &QAction::triggered, this, &MainWindow::save);
     connect(ui_->actionSaveAs, &QAction::triggered, this, &MainWindow::saveAs);
+    connect(ui_->actionExcel, &QAction::triggered, this, &MainWindow::exportAs);
     connect(ui_->actionNewProject, &QAction::triggered, this, &MainWindow::newProject);
     connect(ui_->actionOpenProject, &QAction::triggered, this, &MainWindow::openProject);
     connect(ui_->actionDBBrowse, &QAction::triggered, this, &MainWindow::browseDb);
@@ -225,6 +226,25 @@ bool MainWindow::saveAs() // true = successful
     setWindowModified(false);
 
     return true;
+}
+
+
+bool MainWindow::exportAs() // true = successful
+{
+    QString fileName =
+      QFileDialog::getSaveFileName(nullptr,
+                                   tr("Export As Excel File"),
+                                   QDir::homePath(),
+                                   tr("Excel File (*.xlsx)"));
+
+    if (fileName.isEmpty()) {
+        return false;
+    }
+    if (!fileName.endsWith("xlsx", Qt::CaseInsensitive)) {
+        fileName += ".xlsx";
+    }
+
+    return ExcelExporter::exportScene(flowScene_, fileName);
 }
 
 void MainWindow::newProject()
