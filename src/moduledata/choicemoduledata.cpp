@@ -51,6 +51,9 @@ QString ChoiceModuleData::getString() const
     if (!choiceData_) {
         return "";
     }
+    if (choiceData_->string() == "") {
+        return choiceList_[0];
+    }
     return choiceData_->string();
 }
 
