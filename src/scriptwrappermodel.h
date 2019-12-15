@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QWidget>
 #include <QLabel>
+#include <QDir>
 #include <QException>
 #include <QJSEngine>
 #include <QJSValue>
@@ -80,6 +81,9 @@ private:
     QString validationMessage_;
 
     QWidget* dockWidget_;
+
+    bool hasPicture_ = false;
+    QPixmap pixmap_;
 
     void setupDockWidget();
     void calculate();

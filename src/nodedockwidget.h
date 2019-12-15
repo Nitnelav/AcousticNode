@@ -21,6 +21,10 @@ public:
     QUuid nodeId() const;
     void setNodeId(const QUuid &nodeId);
 
+
+    QSize sizeHint() const override;
+
+
 signals:
     void closed(QUuid nodeId);
 };

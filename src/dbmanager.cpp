@@ -60,8 +60,20 @@ QDialog *DbManager::getSearchDialog()
     return searchDialog_;
 }
 
+QDialog *DbManager::openSearchDialog(bool buttons)
+{
+    if (buttons) {
+        searchDialogUi_->buttonBox->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Apply);
+    } else {
+        searchDialogUi_->buttonBox->setStandardButtons(QDialogButtonBox::Close);
+    }
+    searchDialog_->open();
+    return searchDialog_;
+}
+
 void DbManager::setFromDb(std::shared_ptr<SpectrumModuleData> module)
 {
+    searchDialogUi_->buttonBox->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Apply);
     connect(searchDialogUi_->buttonBox, &QDialogButtonBox::clicked, this, [=](QAbstractButton* button) {
         auto role = searchDialogUi_->buttonBox->buttonRole(button);
         switch (role) {

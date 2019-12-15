@@ -30,6 +30,8 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 [Files]
 Source: "..\..\build--Desktop_Qt_5_12_1_MinGW_64_bit-Release\install\AcousticNode.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\build--Desktop_Qt_5_12_1_MinGW_64_bit-Release\install\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\modules\*"; DestDir: "{app}\modules"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\database.db"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

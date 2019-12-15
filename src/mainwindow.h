@@ -15,9 +15,11 @@
 #include <QFileDialog>
 #include <QtCharts/QChart>
 #include <QMessageBox>
+#include <QColorDialog>
 
 #include <Node>
 #include <NodeData>
+#include <NodeGroup>
 #include <NodeStyle>
 #include <FlowScene>
 #include <FlowView>
@@ -37,6 +39,7 @@ using QtNodes::DataModelRegistry;
 using QtNodes::Node;
 using QtNodes::NodeStyle;
 using QtNodes::FlowScene;
+using QtNodes::NodeGroup;
 using QtNodes::FlowView;
 using QtNodes::ConnectionStyle;
 using QtNodes::TypeConverter;
@@ -94,6 +97,7 @@ private slots:
     void selectionChanged();
 
     void nodeContextMenu(Node& n, const QPointF& pos);
+    void groupContextMenu(NodeGroup& g, const QPointF& pos);
 
     void dockClosed(QUuid nodeId);
 

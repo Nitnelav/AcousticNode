@@ -50,7 +50,7 @@ std::shared_ptr<DataModelRegistry> ModuleManager::getModuleRegistry()
     auto ret = std::make_shared<DataModelRegistry>();
     QJSEngine* js = js_;
     DbManager* db = db_;
-    foreach (QString path, validModules_) {
+    for (QString path: validModules_) {
         auto creator = [js, db, path]() {
             return std::make_unique<ScriptWrapperModel>(js, db, path);
         };
@@ -62,26 +62,35 @@ std::shared_ptr<DataModelRegistry> ModuleManager::getModuleRegistry()
 void ModuleManager::loadModules()
 {
     validModules_.clear();
-    QStringList modules = modulesDir_.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
-    foreach (QString module, modules) {
-        QDir moduleDir = QDir(modulesDir_);
-        moduleDir.cd(module);
-        try {
-            moduleValidator(moduleDir);
-            validModules_.append(moduleDir.filePath("module.mjs"));
-        } catch (ModuleError& e){
-            QString message(e.what());
-            message.toLatin1();
+
+    for (QDir modulesDir: modulesDirList_) {
+        QStringList modules = modulesDir.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
+        for (QString module: modules) {
+            QDir dir = QDir(modulesDir); // copy before cd
+            dir.cd(module);
+            try {
+                moduleValidator(dir);
+                validModules_.append(dir.filePath("module.mjs"));
+            } catch (ModuleError& e){
+                QString message(e.what());
+                qDebug() << dir << ";" << message.toLatin1();
+            }
         }
     }
+
 }
 
-QDir ModuleManager::getModulesDir() const
+QList<QDir> ModuleManager::getModulesDirList() const
 {
-    return modulesDir_;
+    return modulesDirList_;
 }
 
-void ModuleManager::setModulesDir(const QString &path)
+void ModuleManager::addModulesDir(const QString &path)
 {
-    modulesDir_ = QDir(path);
+    modulesDirList_.append(QDir(path));
+}
+
+void ModuleManager::clearModulesDir()
+{
+    modulesDirList_.clear();
 }

@@ -16,6 +16,10 @@
   <property name="windowTitle">
    <string>DataBase Browser</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources/resources.qrc">
+    <normaloff>:/logo/logo.ico</normaloff>:/logo/logo.ico</iconset>
+  </property>
   <property name="modal">
    <bool>true</bool>
   </property>
@@ -130,7 +134,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources/resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

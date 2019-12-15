@@ -35,6 +35,8 @@ include(./externals/QXlsx/QXlsx.pri)
 
 
 SOURCES += \
+    externals/nodeeditor/src/NodeGroup.cpp \
+    externals/nodeeditor/src/NodeGroupGraphicsObject.cpp \
     src/excelexporter.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
@@ -72,6 +74,8 @@ SOURCES += \
     src/moduledata/choicemoduledata.cpp
 
 HEADERS += \
+    externals/nodeeditor/src/NodeGroup.hpp \
+    externals/nodeeditor/src/NodeGroupGraphicsObject.hpp \
     src/excelexporter.h \
     src/mainwindow.h \
     src/scriptwrappermodel.h \
@@ -102,6 +106,8 @@ HEADERS += \
     externals/nodeeditor/include/nodes/internal/Serializable.hpp \
     externals/nodeeditor/include/nodes/internal/Style.hpp \
     externals/nodeeditor/include/nodes/internal/TypeConverter.hpp \
+    externals/nodeeditor/include/nodes/internal/NodeGroup.hpp \
+    externals/nodeeditor/include/nodes/internal/NodeGroupGraphicsObject.hpp \
     externals/nodeeditor/include/nodes/Connection \
     externals/nodeeditor/include/nodes/ConnectionStyle \
     externals/nodeeditor/include/nodes/DataModelRegistry \
@@ -116,6 +122,7 @@ HEADERS += \
     externals/nodeeditor/include/nodes/NodeState \
     externals/nodeeditor/include/nodes/NodeStyle \
     externals/nodeeditor/include/nodes/TypeConverter \
+    externals/nodeeditor/include/nodes/NodeGroup \
     externals/nodeeditor/src/ConnectionBlurEffect.hpp \
     externals/nodeeditor/src/ConnectionPainter.hpp \
     externals/nodeeditor/src/NodeConnectionInteraction.hpp \
@@ -145,9 +152,6 @@ FORMS += \
 
 RESOURCES += \
     resources/resources.qrc
-
-#LIBS += -lnodesdebug
-#LIBS += -LC:\Users\valen\Documents\GitHub\AcousticNode\externals\nodeeditor\Mingw64bit\lib
 
 INCLUDEPATH += ./externals/nodeeditor/include/nodes
 INCLUDEPATH += ./externals/nodeeditor/include/nodes/internal

@@ -1,5 +1,7 @@
 #include "scriptwrappermodel.h"
 
+#include <QDebug>
+
 ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString path):
     js_(engine),
     db_(db),
@@ -10,6 +12,15 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
     moduleChartView_ = new QChartView();
 
     module_ = js_->importModule(path_);
+    QFileInfo fileInfo(path_);
+    QDir dir(fileInfo.path());
+    QStringList filters = {"*.png", "*.xpm", "*.jpg", "*.jpeg"};
+    QFileInfoList pictureFiles = dir.entryInfoList(filters);
+
+    if (!pictureFiles.empty()) {
+        hasPicture_ = true;
+        pixmap_ = QPixmap(pictureFiles.at(0).absoluteFilePath());
+    }
 
     if (module_.isError()) {
         throw ScriptLoadError(path.toLatin1());
@@ -298,6 +309,29 @@ void ScriptWrapperModel::setupDockWidget()
     descriptionEdit->setPlainText(description_);
     infoLayout->addRow("Description", descriptionEdit);
 
+    connect(nameEdit, &QLineEdit::textEdited, this, &ScriptWrapperModel::setCaption);
+    connect(descriptionEdit, &QPlainTextEdit::textChanged, [=]() {
+        setDescription(descriptionEdit->toPlainText());
+    });
+
+    if (hasPicture_) {
+        QLabel* picture = new QLabel();
+
+        picture->setBackgroundRole(QPalette::Base);
+        picture->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Expanding);
+        picture->setPixmap(pixmap_);
+
+        QScrollArea* scrollArea = new QScrollArea();
+        scrollArea->setAlignment(Qt::AlignCenter);
+        scrollArea->setWidget(picture);
+        scrollArea->setWidgetResizable(false);
+        scrollArea->setVisible(true);
+
+        picture->setScaledContents(true);
+        scrollArea->adjustSize();
+
+        infoLayout->addRow("Picture", scrollArea);
+    }
 
 
     QFrame* dataFrame = new QFrame();
@@ -362,16 +396,6 @@ void ScriptWrapperModel::setupDockWidget()
 
     mainLayout->addWidget(tabWidget);
     dockWidget_->setLayout(mainLayout);
-
-//    QSplitter* splitter = new QSplitter(Qt::Vertical);
-//    splitter->addWidget(infoFrame);
-//    splitter->addWidget(dataFrame);
-//    splitter->addWidget(moduleChartView_);
-//    splitter->setStretchFactor(1, 0);
-//    splitter->setStretchFactor(2, 2);
-
-//    mainLayout->addWidget(splitter);
-//    dockWidget_->setLayout(mainLayout);
 }
 
 void ScriptWrapperModel::calculate()

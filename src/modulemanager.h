@@ -21,6 +21,7 @@ private:
     QJSEngine* js_;
     DbManager* db_;
     QDir modulesDir_;
+    QList<QDir> modulesDirList_;
     QStringList validModules_;
 
     void moduleValidator(QDir &dir);
@@ -32,8 +33,10 @@ public:
 
     void loadModules();
 
-    QDir getModulesDir() const;
-    void setModulesDir(const QString &path);
+    QList<QDir> getModulesDirList() const;
+    void addModulesDir(const QString &path);
+    void clearModulesDir();
+
 };
 
 #endif // MODULEMANAGER_H

@@ -10,6 +10,7 @@
 #include <QSqlRecord>
 #include <QSqlQueryModel>
 #include <QAbstractButton>
+#include <QDialogButtonBox>
 #include <QModelIndex>
 
 #include "ui_dbsearch.h"
@@ -33,6 +34,7 @@ public:
     void removeDb(const QString &name);
 
     QDialog* getSearchDialog();
+    QDialog* openSearchDialog(bool buttons = false);
     void setFromDb(std::shared_ptr<SpectrumModuleData> module);
 
 public slots:

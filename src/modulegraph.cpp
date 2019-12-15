@@ -54,6 +54,9 @@ void ModuleGraph::appendSpectrumData(std::shared_ptr<SpectrumModuleData> data)
     if (!data) {
         return;
     }
+    if (barSetList_.indexOf(data->getBarSet()) >= 0) {
+        return;
+    }
     barSeries_->append(data->getBarSet());
     barSetList_.append(data->getBarSet());
     connect(data->getBarSet(), &QBarSet::valueChanged, this, &ModuleGraph::valueChanged);

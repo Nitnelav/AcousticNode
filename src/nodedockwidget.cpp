@@ -27,6 +27,11 @@ void NodeDockWidget::setNodeId(const QUuid &nodeId)
     nodeId_ = nodeId;
 }
 
+QSize NodeDockWidget::sizeHint() const
+{
+    return QSize(400, 200);
+}
+
 void NodeDockWidget::closeEvent(QCloseEvent *event)
 {
     QWidget* child = widget();

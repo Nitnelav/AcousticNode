@@ -10,12 +10,48 @@ MainWindow::MainWindow(QWidget *parent) :
     QCoreApplication::setApplicationName("AcousticNode");
     ui_->setupUi(this);
 
+    int size = 0;
+    QSettings settings("config.ini", QSettings::IniFormat);
+
+//    settings.beginWriteArray("databases");
+//    settings.setArrayIndex(0);
+//    settings.setValue("name", "Local DataBase");
+//    settings.setValue("path", "C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\database.db");
+//    settings.endArray();
+
+
+//    settings.beginWriteArray("modules");
+//    settings.setArrayIndex(0);
+//    settings.setValue("dir", "C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\modules");
+//    settings.endArray();
+
     dbMgr_ = new DbManager();
-    dbMgr_->addDb("C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\database.db", "Local DataBase");
+
+    size = settings.beginReadArray("databases");
+    for (int i = 0; i < size; ++i) {
+        settings.setArrayIndex(i);
+        QString name = settings.value("name").toString();
+        QString path = settings.value("path").toString();
+        if (!QFile::exists(path)) {
+            continue;
+        }
+        dbMgr_->addDb(path, name);
+    }
+    settings.endArray();
 
     js_ = new QJSEngine();
     moduleMgr_ = new ModuleManager(js_, dbMgr_);
-    moduleMgr_->setModulesDir("C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\modules");
+
+    size = settings.beginReadArray("modules");
+    for (int i = 0; i < size; ++i) {
+        settings.setArrayIndex(i);
+        QString dir = settings.value("dir").toString();
+        if (!QFile::exists(dir)) {
+            continue;
+        }
+        moduleMgr_->addModulesDir(dir);
+    }
+    settings.endArray();
     moduleMgr_->loadModules();
 
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
@@ -35,11 +71,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(flowScene_, &FlowScene::nodeCreated, this, &MainWindow::nodeCreated);
     connect(flowScene_, &FlowScene::nodeDeleted, this, &MainWindow::nodeDeleted);
     connect(flowScene_, &FlowScene::nodeContextMenu, this, &MainWindow::nodeContextMenu);
+    connect(flowScene_, &FlowScene::groupContextMenu, this, &MainWindow::groupContextMenu);
     connect(flowScene_, &FlowScene::selectionChanged, this, &MainWindow::selectionChanged);
     connect(flowScene_, &FlowScene::nodeDoubleClicked, this, &MainWindow::nodeLocked);
 
-    QSettings settings("config.ini", QSettings::IniFormat);
-    qDebug() << settings.fileName();
     QStringList recentFilePaths = settings.value("recentProjects").toStringList();
     for (int i = 0; i < MAX_RECENT_FILES; ++i) {
         recentFileActs_[i] = new QAction(this);
@@ -172,6 +207,23 @@ void MainWindow::nodeContextMenu(Node &n, const QPointF &pos)
         }
         nodeModel->setNodeStyle(dockedNodeStyle_);
         nodeDocks_[node->id()] = newDock;
+    });
+    menu->popup(ui_->flowView->mapToGlobal(ui_->flowView->mapFromScene(pos)));
+    connect(menu, &QMenu::aboutToHide, menu, &QMenu::deleteLater);
+}
+
+void MainWindow::groupContextMenu(QtNodes::NodeGroup &g, const QPointF &pos)
+{
+    NodeGroup* group= &g;
+    QMenu* menu = new QMenu();
+    QAction* colorAction = menu->addAction("Set color ...");
+    connect(colorAction, &QAction::triggered, [=]() {
+        QColor color = QColorDialog::getColor();
+        group->setColor(color);
+    });
+    QAction* deleteAction = menu->addAction("Delete");
+    connect(deleteAction, &QAction::triggered, [=]() {
+
     });
     menu->popup(ui_->flowView->mapToGlobal(ui_->flowView->mapFromScene(pos)));
     connect(menu, &QMenu::aboutToHide, menu, &QMenu::deleteLater);
@@ -345,7 +397,7 @@ void MainWindow::openRecentProject()
 
 void MainWindow::browseDb()
 {
-    dbMgr_->getSearchDialog()->open();
+    dbMgr_->openSearchDialog(false);
 }
 
 void MainWindow::setCurrentFile(const QString &fileName)
@@ -370,8 +422,6 @@ void MainWindow::updateRecentFileActions()
 {
     QSettings settings("config.ini", QSettings::IniFormat);
     QStringList files = settings.value("recentProjects").toStringList();
-    qDebug() << settings.fileName();
-    qDebug() << files;
     int numRecentFiles = qMin(files.size(), MAX_RECENT_FILES);
 
     for (int i = 0; i < numRecentFiles; ++i) {
