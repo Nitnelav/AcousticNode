@@ -50,11 +50,17 @@ std::shared_ptr<DataModelRegistry> ModuleManager::getModuleRegistry()
     auto ret = std::make_shared<DataModelRegistry>();
     QJSEngine* js = js_;
     DbManager* db = db_;
-    for (QString path: validModules_) {
-        auto creator = [js, db, path]() {
-            return std::make_unique<ScriptWrapperModel>(js, db, path);
-        };
-        ret->registerModel<ScriptWrapperModel>(std::move(creator));
+
+    QMapIterator<QString, QStringList> it(validModules_);
+    while (it.hasNext()) {
+        it.next();
+        QString category = it.key();
+        for (QString path: it.value()) {
+            auto creator = [js, db, path]() {
+                return std::make_unique<ScriptWrapperModel>(js, db, path);
+            };
+            ret->registerModel<ScriptWrapperModel>(std::move(creator), category);
+        }
     }
     return ret;
 }
@@ -64,20 +70,25 @@ void ModuleManager::loadModules()
     validModules_.clear();
 
     for (QDir modulesDir: modulesDirList_) {
-        QStringList modules = modulesDir.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
-        for (QString module: modules) {
-            QDir dir = QDir(modulesDir); // copy before cd
-            dir.cd(module);
-            try {
-                moduleValidator(dir);
-                validModules_.append(dir.filePath("module.mjs"));
-            } catch (ModuleError& e){
-                QString message(e.what());
-                qDebug() << dir << ";" << message.toLatin1();
+        QStringList rootDirList = modulesDir.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
+        for (QString rootDir: rootDirList) {
+            QDir root = QDir(modulesDir); // copy before cd
+            root.cd(rootDir);
+            QString category = root.dirName();
+            QStringList modules = root.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
+            for (QString module: modules) {
+                QDir dir = QDir(root); // copy before cd
+                dir.cd(module);
+                try {
+                    moduleValidator(dir);
+                    validModules_[category].append(dir.filePath("module.mjs"));
+                } catch (ModuleError& e){
+                    QString message(e.what());
+                    qDebug() << dir << ";" << message.toLatin1();
+                }
             }
         }
     }
-
 }
 
 QList<QDir> ModuleManager::getModulesDirList() const

@@ -6,6 +6,8 @@
 #include <QFile>
 #include <QFileInfo>
 
+#include <QMap>
+#include <QMapIterator>
 #include <DataModelRegistry>
 
 #include "dbmanager.h"
@@ -22,7 +24,8 @@ private:
     DbManager* db_;
     QDir modulesDir_;
     QList<QDir> modulesDirList_;
-    QStringList validModules_;
+    QMap<QString, QStringList> validModules_; // category => modulesList
+//    QStringList validModules_;
 
     void moduleValidator(QDir &dir);
 

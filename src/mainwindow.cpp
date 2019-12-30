@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#define INIT_SETTINGS 1
+
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -13,17 +15,20 @@ MainWindow::MainWindow(QWidget *parent) :
     int size = 0;
     QSettings settings("config.ini", QSettings::IniFormat);
 
-//    settings.beginWriteArray("databases");
-//    settings.setArrayIndex(0);
-//    settings.setValue("name", "Local DataBase");
+#if INIT_SETTINGS
+    settings.beginWriteArray("databases");
+    settings.setArrayIndex(0);
+    settings.setValue("name", "Local DataBase");
 //    settings.setValue("path", "C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\database.db");
-//    settings.endArray();
+    settings.setValue("path", "/home/valoo/Projects/AcousticNode/database.db");
+    settings.endArray();
 
-
-//    settings.beginWriteArray("modules");
-//    settings.setArrayIndex(0);
+    settings.beginWriteArray("modules");
+    settings.setArrayIndex(0);
+    settings.setValue("dir", "/home/valoo/Projects/AcousticNode/modules");
 //    settings.setValue("dir", "C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\modules");
-//    settings.endArray();
+    settings.endArray();
+#endif
 
     dbMgr_ = new DbManager();
 
