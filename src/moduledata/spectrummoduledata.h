@@ -19,6 +19,8 @@ protected:
     QBarSet* barSet_;
     std::shared_ptr<SpectrumData> spectrumData_;
 
+    QList<double> default_ = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+
 public:
     SpectrumModuleData(const QJSValue& element);
 

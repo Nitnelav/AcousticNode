@@ -19,14 +19,14 @@ MainWindow::MainWindow(QWidget *parent) :
     settings.beginWriteArray("databases");
     settings.setArrayIndex(0);
     settings.setValue("name", "Local DataBase");
-//    settings.setValue("path", "C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\database.db");
-    settings.setValue("path", "/home/valoo/Projects/AcousticNode/database.db");
+    settings.setValue("path", "C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\database.db");
+//    settings.setValue("path", "/home/valoo/Projects/AcousticNode/database.db");
     settings.endArray();
 
     settings.beginWriteArray("modules");
     settings.setArrayIndex(0);
-    settings.setValue("dir", "/home/valoo/Projects/AcousticNode/modules");
-//    settings.setValue("dir", "C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\modules");
+//    settings.setValue("dir", "/home/valoo/Projects/AcousticNode/modules");
+    settings.setValue("dir", "C:\\Users\\valen\\Documents\\GitHub\\AcousticNode\\modules");
     settings.endArray();
 #endif
 

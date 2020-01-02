@@ -82,6 +82,14 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
             auto spectrumModuleData = std::make_shared<SpectrumModuleData>(element);
             auto spectrumData = std::make_shared<SpectrumData>();
             spectrumModuleData->setNodeData(spectrumData);
+            if (element.hasProperty("default") && element.property("default").isArray()) {
+                QJSValue defaultSpectrum = element.property("default");
+                if (defaultSpectrum.property("length").toInt() >= 8) {
+                    for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; ++freq) {
+                        spectrumModuleData->setValue(freq, defaultSpectrum.property(freq).toNumber());
+                    }
+                }
+            }
             connect(spectrumModuleData.get(), &SpectrumModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
             parameters_.append(spectrumModuleData);
             moduleChart_->appendSpectrumData(spectrumModuleData);
@@ -94,6 +102,9 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
             auto integerModuleData = std::make_shared<IntegerModuleData>(element);
             auto integerData = std::make_shared<IntegerData>();
             integerModuleData->setNodeData(integerData);
+            if (element.hasProperty("default") && element.property("default").isNumber()) {
+                integerModuleData->setValue(element.property("default").toInt());
+            }
             connect(integerModuleData.get(), &IntegerModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
             parameters_.append(integerModuleData);
             parameterArgs_.setProperty(integerModuleData->id(), integerData->number());
@@ -101,6 +112,9 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
             auto booleanModuleData = std::make_shared<BooleanModuleData>(element);
             auto booleanData = std::make_shared<BooleanData>();
             booleanModuleData->setNodeData(booleanData);
+            if (element.hasProperty("default") && element.property("default").isBool()) {
+                booleanModuleData->setValue(element.property("default").toBool());
+            }
             connect(booleanModuleData.get(), &BooleanModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
             parameters_.append(booleanModuleData);
             parameterArgs_.setProperty(booleanModuleData->id(), booleanData->boolean());
@@ -108,6 +122,9 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
             auto floatModuleData = std::make_shared<FloatModuleData>(element);
             auto floatData = std::make_shared<FloatData>();
             floatModuleData->setNodeData(floatData);
+            if (element.hasProperty("default") && element.property("default").isNumber()) {
+                floatModuleData->setValue(element.property("default").toNumber());
+            }
             connect(floatModuleData.get(), &FloatModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
             parameters_.append(floatModuleData);
             parameterArgs_.setProperty(floatModuleData->id(), floatData->number());
@@ -115,6 +132,20 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
             auto choiceModuleData = std::make_shared<ChoiceModuleData>(element);
             auto choiceData = std::make_shared<ChoiceData>();
             choiceModuleData->setNodeData(choiceData);
+            if (element.hasProperty("default")) {
+                if (element.property("default").isNumber()) {
+                    choiceModuleData->setIndex(element.property("default").toInt());
+                }
+                if (element.property("default").isString()) {
+                    QJSValue list = element.property("choices");
+                    int length = list.property("length").toInt();
+                    for (int i = 0; i < length; i++) {
+                        if (list.property(i).toString() == element.property("default").toString()) {
+                            choiceModuleData->setIndex(i);
+                        }
+                    }
+                }
+            }
             connect(choiceModuleData.get(), &ChoiceModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
             parameters_.append(choiceModuleData);
             parameterArgs_.setProperty(choiceModuleData->id(), choiceData->string());

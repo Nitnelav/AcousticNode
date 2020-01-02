@@ -11,6 +11,18 @@ ChoiceModuleData::ChoiceModuleData(const QJSValue& element):
         }
     }
 
+    if (element.hasProperty("default")) {
+        if (element.property("default").isNumber()) {
+            default_ = element.property("default").toInt();
+        }
+        if (element.property("default").isString()) {
+            QString string = element.property("default").toString();
+            if (int index = choiceList_.indexOf(string) >= 0) {
+                default_ = index;
+            }
+        }
+    }
+
     comboBox_ = new QComboBox();
     comboBox_->insertItems(0, choiceList_);
 
@@ -34,14 +46,14 @@ void ChoiceModuleData::setNodeData(const std::shared_ptr<QtNodes::NodeData> &nod
     if (choiceData_) {
         comboBox_->setCurrentIndex(choiceData_->index());
     } else {
-        comboBox_->setCurrentIndex(0);
+        comboBox_->setCurrentIndex(default_);
     }
 }
 
 int ChoiceModuleData::getIndex() const
 {
     if (!choiceData_) {
-        return 0;
+        return default_;
     }
     return choiceData_->index();
 }
@@ -49,10 +61,10 @@ int ChoiceModuleData::getIndex() const
 QString ChoiceModuleData::getString() const
 {
     if (!choiceData_) {
-        return "";
+        return choiceList_[default_];
     }
     if (choiceData_->string() == "") {
-        return choiceList_[0];
+        return choiceList_[default_];
     }
     return choiceData_->string();
 }

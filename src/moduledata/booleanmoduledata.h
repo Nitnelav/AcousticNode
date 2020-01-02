@@ -15,6 +15,8 @@ private:
     QCheckBox* checkBox_;
     std::shared_ptr<BooleanData> boolData_;
 
+    bool default_ = false;
+
 public:
     BooleanModuleData(const QJSValue& element);
 

@@ -17,6 +17,8 @@ private:
     QComboBox* comboBox_;
     std::shared_ptr<ChoiceData> choiceData_;
 
+    int default_ = 0;
+
 public:
     ChoiceModuleData(const QJSValue& element);
 

@@ -6,6 +6,10 @@ IntegerModuleData::IntegerModuleData(const QJSValue &element):
     spinBox_ = new QSpinBox();
     spinBox_->setRange(-32768, 32767);
 
+    if (element.hasProperty("default")) {
+        default_ = element.property("default").toInt();
+    }
+
     connect<void(QSpinBox::*)(int), void(IntegerModuleData::*)(int)>
             (spinBox_, &QSpinBox::valueChanged, this, &IntegerModuleData::valueChanged);
 }
@@ -26,14 +30,14 @@ void IntegerModuleData::setNodeData(const std::shared_ptr<QtNodes::NodeData> &no
     if (intData_) {
         spinBox_->setValue(intData_->number());
     } else {
-        spinBox_->setValue(0);
+        spinBox_->setValue(default_);
     }
 }
 
 int IntegerModuleData::getValue() const
 {
     if (!intData_) {
-        return 0;
+        return default_;
     }
     return intData_->number();
 }

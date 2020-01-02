@@ -6,6 +6,10 @@ BooleanModuleData::BooleanModuleData(const QJSValue &element):
     checkBox_ = new QCheckBox();
     checkBox_->setText("");
 
+    if (element.hasProperty("default")) {
+        default_ = element.property("default").toBool();
+    }
+
     connect(checkBox_, &QCheckBox::toggled, this, &BooleanModuleData::toggled);
 }
 
@@ -25,14 +29,14 @@ void BooleanModuleData::setNodeData(const std::shared_ptr<QtNodes::NodeData> &no
     if (boolData_) {
         checkBox_->setChecked(boolData_->boolean());
     } else {
-        checkBox_->setChecked(false);
+        checkBox_->setChecked(default_);
     }
 }
 
 bool BooleanModuleData::getValue() const
 {
     if (!boolData_) {
-        return false;
+        return default_;
     }
     return boolData_->boolean();
 }

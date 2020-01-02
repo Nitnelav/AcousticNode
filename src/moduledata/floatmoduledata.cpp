@@ -6,6 +6,10 @@ FloatModuleData::FloatModuleData(const QJSValue &element):
     spinBox_ = new QDoubleSpinBox();
     spinBox_->setRange(-DBL_MAX, DBL_MAX);
 
+    if (element.hasProperty("default")) {
+        default_ = element.property("default").toNumber();
+    }
+
     connect<void(QDoubleSpinBox::*)(double), void(FloatModuleData::*)(double)>
             (spinBox_, &QDoubleSpinBox::valueChanged, this, &FloatModuleData::valueChanged);
 }
@@ -26,14 +30,14 @@ void FloatModuleData::setNodeData(const std::shared_ptr<QtNodes::NodeData> &node
     if (floatData_) {
         spinBox_->setValue(floatData_->number());
     } else {
-        spinBox_->setValue(0.0);
+        spinBox_->setValue(default_);
     }
 }
 
 double FloatModuleData::getValue() const
 {
     if (!floatData_) {
-        return 0.0;
+        return default_;
     }
     return floatData_->number();
 }

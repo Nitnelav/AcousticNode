@@ -13,6 +13,7 @@ class IntegerModuleData : public ModuleData
 private:
     QSpinBox* spinBox_;
     std::shared_ptr<IntegerData> intData_;
+    int default_ = 0;
 
 public:
     IntegerModuleData(const QJSValue& element);

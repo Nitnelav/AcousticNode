@@ -16,6 +16,8 @@ private:
     QDoubleSpinBox* spinBox_;
     std::shared_ptr<FloatData> floatData_;
 
+    double default_ = 0.0;
+
 public:
     FloatModuleData(const QJSValue& element);
 
