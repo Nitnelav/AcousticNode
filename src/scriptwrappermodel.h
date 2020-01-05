@@ -92,7 +92,7 @@ public:
     ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString path);
     virtual ~ScriptWrapperModel() override;
 
-    void setCaption(const QString& caption) { caption_ = caption; }
+    void setCaption(const QString& caption);
     /// Caption is used in GUI
     QString caption() const override;
 

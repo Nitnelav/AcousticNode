@@ -279,5 +279,16 @@
         <file>convert.png</file>
         <file>DefaultStyle.json</file>
         <file>../logo/logo.ico</file>
+        <file>_icons/database-add.png</file>
+        <file>_icons/database-edit.png</file>
+        <file>_icons/database-search.png</file>
+        <file>_icons/database-settings.png</file>
+        <file>_icons/database-subtract.png</file>
+        <file>_icons/module-add.png</file>
+        <file>_icons/module-edit.png</file>
+        <file>_icons/module-settings.png</file>
+        <file>_icons/module-three-1.png</file>
+        <file>_icons/module-three-2.png</file>
+        <file>_icons/module.png</file>
     </qresource>
 </RCC>

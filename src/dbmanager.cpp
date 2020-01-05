@@ -1,7 +1,5 @@
 #include "dbmanager.h"
 
-#include <QDebug>
-
 DbManager::DbManager() : QObject(nullptr),
     searchDialog_(new QDialog),
     searchDialogUi_(new Ui::DbSearchDialog)
@@ -47,7 +45,11 @@ void DbManager::removeDb(const QString &name)
     QSqlDatabase::removeDatabase(name);
 
     if (currentDbName_ == name) {
-        changeDb(QSqlDatabase::connectionNames().at(0));
+        if (QSqlDatabase::connectionNames().size() > 0) {
+            changeDb(QSqlDatabase::connectionNames().at(0));
+        } else {
+            currentDbName_ = "";
+        }
     }
     searchDialogUi_->dbListCombo->clear();
     foreach (auto dbName, dbList()) {

@@ -76,7 +76,7 @@
      <x>0</x>
      <y>0</y>
      <width>1028</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -103,10 +103,21 @@
     <property name="title">
      <string>DataBase</string>
     </property>
+    <addaction name="actionDBSetPaths"/>
+    <addaction name="separator"/>
     <addaction name="actionDBBrowse"/>
+   </widget>
+   <widget class="QMenu" name="menuModules">
+    <property name="title">
+     <string>Modules</string>
+    </property>
+    <addaction name="actionModulesSetPaths"/>
+    <addaction name="separator"/>
+    <addaction name="actionAddNode"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDataBase"/>
+   <addaction name="menuModules"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
    <property name="sizePolicy">
@@ -199,7 +210,10 @@
    <addaction name="actionOpenProject"/>
    <addaction name="actionSave"/>
    <addaction name="separator"/>
+   <addaction name="actionModulesSetPaths"/>
+   <addaction name="actionAddNode"/>
    <addaction name="separator"/>
+   <addaction name="actionDBSetPaths"/>
    <addaction name="actionDBBrowse"/>
   </widget>
   <action name="actionNewProject">
@@ -279,24 +293,10 @@
   <action name="actionDBBrowse">
    <property name="icon">
     <iconset resource="../resources/resources.qrc">
-     <normaloff>:/icons/database.svg</normaloff>:/icons/database.svg</iconset>
+     <normaloff>:/_icons/database-search.png</normaloff>:/_icons/database-search.png</iconset>
    </property>
    <property name="text">
     <string>Browse...</string>
-   </property>
-  </action>
-  <action name="actionAdd_Node">
-   <property name="icon">
-    <iconset resource="../resources/resources.qrc">
-     <normaloff>:/icons/plus-square.svg</normaloff>:/icons/plus-square.svg</iconset>
-   </property>
-   <property name="text">
-    <string>Add Node...</string>
-   </property>
-  </action>
-  <action name="actiondf">
-   <property name="text">
-    <string>df</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -307,6 +307,33 @@
   <action name="actionExcel">
    <property name="text">
     <string>Excel Export...</string>
+   </property>
+  </action>
+  <action name="actionDBSetPaths">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/_icons/database-settings.png</normaloff>:/_icons/database-settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Set paths...</string>
+   </property>
+  </action>
+  <action name="actionModulesSetPaths">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/_icons/module-settings.png</normaloff>:/_icons/module-settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Set paths...</string>
+   </property>
+  </action>
+  <action name="actionAddNode">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/_icons/module-add.png</normaloff>:/_icons/module-add.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Node</string>
    </property>
   </action>
  </widget>

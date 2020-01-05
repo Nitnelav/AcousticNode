@@ -1,9 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#define INIT_SETTINGS 1
-
 #include <QDebug>
+
+#define INIT_SETTINGS 0
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     settings.endArray();
 
     js_ = new QJSEngine();
+    js_->installExtensions(QJSEngine::ConsoleExtension);
     moduleMgr_ = new ModuleManager(js_, dbMgr_);
 
     size = settings.beginReadArray("modules");
@@ -96,6 +97,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui_->actionOpenProject, &QAction::triggered, this, &MainWindow::openProject);
     connect(ui_->actionDBBrowse, &QAction::triggered, this, &MainWindow::browseDb);
     connect(ui_->actionQuit, &QAction::triggered, this, &MainWindow::close);
+    connect(ui_->actionAddNode, &QAction::triggered, this, &MainWindow::nodeMenu);
+    connect(ui_->actionDBSetPaths, &QAction::triggered, [=]() {
+        DbPathDialog* dlg = new DbPathDialog(dbMgr_);
+        dlg->exec();
+    });
+    connect(ui_->actionModulesSetPaths, &QAction::triggered, [=]() {
+        ModulePathDialog* dlg = new ModulePathDialog(moduleMgr_);
+        dlg->exec();
+        moduleMgr_->loadModules();
+        flowScene_->setRegistry(moduleMgr_->getModuleRegistry());
+    });
 }
 
 MainWindow::~MainWindow()
@@ -438,6 +450,96 @@ void MainWindow::updateRecentFileActions()
     for (int j = numRecentFiles; j < MAX_RECENT_FILES; ++j) {
         recentFileActs_[j]->setVisible(false);
     }
+}
+
+void MainWindow::nodeMenu()
+{
+    QMenu* modelMenu = new QMenu();
+
+    auto skipText = QStringLiteral("skip me");
+
+    //Add filterbox to the context menu
+    auto *txtBox = new QLineEdit(modelMenu);
+
+    txtBox->setPlaceholderText(QStringLiteral("Filter"));
+    txtBox->setClearButtonEnabled(true);
+
+    auto *txtBoxAction = new QWidgetAction(modelMenu);
+    txtBoxAction->setDefaultWidget(txtBox);
+
+    modelMenu->addAction(txtBoxAction);
+
+    //Add result treeview to the context menu
+    auto *treeView = new QTreeWidget(modelMenu);
+    treeView->header()->close();
+
+    auto *treeViewAction = new QWidgetAction(modelMenu);
+    treeViewAction->setDefaultWidget(treeView);
+
+    modelMenu->addAction(treeViewAction);
+
+    QMap<QString, QTreeWidgetItem*> topLevelItems;
+    for (auto const &cat : flowScene_->registry().categories())
+    {
+      auto item = new QTreeWidgetItem(treeView);
+      item->setText(0, cat);
+      item->setData(0, Qt::UserRole, skipText);
+      topLevelItems[cat] = item;
+    }
+
+    for (auto const &assoc : flowScene_->registry().registeredModelsCategoryAssociation())
+    {
+      auto parent = topLevelItems[assoc.second];
+      auto item   = new QTreeWidgetItem(parent);
+      item->setText(0, assoc.first);
+      item->setData(0, Qt::UserRole, assoc.first);
+    }
+
+    treeView->expandAll();
+
+    connect(treeView, &QTreeWidget::itemClicked, [&](QTreeWidgetItem *item, int)
+    {
+      QString modelName = item->data(0, Qt::UserRole).toString();
+
+      if (modelName == skipText)
+      {
+        return;
+      }
+
+      auto type = flowScene_->registry().create(modelName);
+
+      if (type)
+      {
+        auto& node = flowScene_->createNode(std::move(type));
+
+        modelMenu->close();
+        flowScene_->nodePlaced(node);
+      }
+      else
+      {
+        qDebug() << "Model not found";
+      }
+    });
+
+    //Setup filtering
+    connect(txtBox, &QLineEdit::textChanged, [&](const QString &text)
+    {
+      for (auto& topLvlItem : topLevelItems)
+      {
+        for (int i = 0; i < topLvlItem->childCount(); ++i)
+        {
+          auto child = topLvlItem->child(i);
+          auto modelName = child->data(0, Qt::UserRole).toString();
+          const bool match = (modelName.contains(text, Qt::CaseInsensitive));
+          child->setHidden(!match);
+        }
+      }
+    });
+
+    // make sure the text box gets focus so the user doesn't have to click on it
+    txtBox->setFocus();
+
+    modelMenu->exec(QCursor::pos());
 }
 
 void MainWindow::setStyles()

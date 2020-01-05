@@ -7,7 +7,8 @@ export const inputs = [
 ];
 
 export const parameters = [
-    { id: "param1", type: 'spectrum', typeName: "Lw", description: 'Correction Lw'},
+    { id: "correction", type: 'spectrum', typeName: "Lw", description: 'Correction Lw'},
+    { id: "choice", type: 'choice', typeName: "Choice", description: 'Add or Substract', choices: ["add", "substract"], default: "add"},
 ];
 
 export const outputs = [
@@ -17,8 +18,9 @@ export const outputs = [
 export function calculate (inputs, parameters) {
     var outputs = {};
     var outputLw = [];
+    var addOrSub = parameters["choice"] === "add" ? 1 : -1;
     for (let freq = 0; freq < 8; freq++) {
-        outputLw[freq] = inputs["in1"][freq] + parameters["param1"][freq];
+        outputLw[freq] = inputs["in1"][freq] + addOrSub * parameters["correction"][freq];
     }
     outputs["out1"] = outputLw;
     return outputs;

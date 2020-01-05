@@ -16,6 +16,8 @@
 #include <QtCharts/QChart>
 #include <QMessageBox>
 #include <QColorDialog>
+#include <QWidgetAction>
+#include <QTreeWidget>
 
 #include <Node>
 #include <NodeData>
@@ -30,6 +32,8 @@
 #include "scriptwrappermodel.h"
 #include "modulemanager.h"
 #include "dbmanager.h"
+#include "dbpathdialog.h"
+#include "modulepathdialog.h"
 #include "modulegraph.h"
 #include "excelexporter.h"
 
@@ -107,6 +111,8 @@ private slots:
     void newProject();
     void openProject();
     void openRecentProject();
+
+    void nodeMenu();
 
     void browseDb();
 };

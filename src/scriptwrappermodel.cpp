@@ -1,7 +1,5 @@
 #include "scriptwrappermodel.h"
 
-#include <QDebug>
-
 ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString path):
     js_(engine),
     db_(db),
@@ -47,6 +45,10 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
     caption_ = module_.property("caption").toString();
     description_ = "";
     descriptionWidget_ = std::make_shared<QLabel>(description_);
+
+    if (module_.hasProperty("description") && module_.property("description").isString()) {
+        description_ = module_.property("description").toString();
+    }
 
     inputArgs_ = js_->newObject();
     inputsDefinition_ = module_.property("inputs");
@@ -186,6 +188,11 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
 ScriptWrapperModel::~ScriptWrapperModel()
 {
     delete dockWidget_;
+}
+
+void ScriptWrapperModel::setCaption(const QString &caption)
+{
+     caption_ = caption;
 }
 
 QString ScriptWrapperModel::caption() const
