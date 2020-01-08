@@ -290,5 +290,8 @@
         <file>_icons/module-three-1.png</file>
         <file>_icons/module-three-2.png</file>
         <file>_icons/module.png</file>
+        <file>_icons/bin.png</file>
+        <file>_icons/color-painting-palette.png</file>
+        <file>_icons/pencil-write.png</file>
     </qresource>
 </RCC>

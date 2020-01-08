@@ -229,18 +229,41 @@ void MainWindow::nodeContextMenu(Node &n, const QPointF &pos)
     connect(menu, &QMenu::aboutToHide, menu, &QMenu::deleteLater);
 }
 
-void MainWindow::groupContextMenu(QtNodes::NodeGroup &g, const QPointF &pos)
+void MainWindow::groupContextMenu(NodeGroup &g, const QPointF &pos)
 {
-    NodeGroup* group= &g;
+    NodeGroup* group = &g;
     QMenu* menu = new QMenu();
     QAction* colorAction = menu->addAction("Set color ...");
+    colorAction->setIcon(QIcon(":/_icons/color-painting-palette.png"));
     connect(colorAction, &QAction::triggered, [=]() {
         QColor color = QColorDialog::getColor();
         group->setColor(color);
     });
-    QAction* deleteAction = menu->addAction("Delete");
-    connect(deleteAction, &QAction::triggered, [=]() {
 
+    QAction* renameAction = menu->addAction("Set name ...");
+    renameAction->setIcon(QIcon(":/_icons/pencil-write.png"));
+    connect(renameAction, &QAction::triggered, [=]() {
+        bool ok;
+        QString text = QInputDialog::getText(this, tr("Rename Group"),
+                                             tr("Group name:"), QLineEdit::Normal,
+                                             group->title(), &ok);
+        if (ok && !text.isEmpty())
+            group->setTitle(text);
+    });
+
+    menu->addSeparator();
+
+    QAction* moduleAction = menu->addAction("Add module ...");
+    moduleAction->setIcon(QIcon(":/_icons/module-add.png"));
+    moduleAction->setProperty("position", pos);
+    connect(moduleAction, &QAction::triggered, this, &MainWindow::nodeMenu);
+
+    menu->addSeparator();
+
+    QAction* deleteAction = menu->addAction("Delete");
+    deleteAction->setIcon(QIcon(":/_icons/bin.png"));
+    connect(deleteAction, &QAction::triggered, [&]() {
+        flowScene_->removeGroup(g);
     });
     menu->popup(ui_->flowView->mapToGlobal(ui_->flowView->mapFromScene(pos)));
     connect(menu, &QMenu::aboutToHide, menu, &QMenu::deleteLater);
@@ -454,6 +477,8 @@ void MainWindow::updateRecentFileActions()
 
 void MainWindow::nodeMenu()
 {
+    QObject* sender = QObject::sender();
+
     QMenu* modelMenu = new QMenu();
 
     auto skipText = QStringLiteral("skip me");
@@ -512,6 +537,10 @@ void MainWindow::nodeMenu()
       {
         auto& node = flowScene_->createNode(std::move(type));
 
+        if (sender && sender->property("position").isValid()) {
+            QPoint position = sender->property("position").toPoint();
+            node.nodeGraphicsObject().setPos(position);
+        }
         modelMenu->close();
         flowScene_->nodePlaced(node);
       }

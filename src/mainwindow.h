@@ -18,6 +18,8 @@
 #include <QColorDialog>
 #include <QWidgetAction>
 #include <QTreeWidget>
+#include <QAction>
+#include <QInputDialog>
 
 #include <Node>
 #include <NodeData>
