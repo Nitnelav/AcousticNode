@@ -40,6 +40,7 @@
 using QtNodes::PortType;
 using QtNodes::PortIndex;
 using QtNodes::NodeData;
+using QtNodes::NodeStyle;
 using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
@@ -148,6 +149,9 @@ private slots:
     void toggleNR();
     void spectrumContextMenu(const QPoint &pos, SpectrumModuleData* spectrumModuleData);
     void setFromDb();
+
+signals:
+    void captionChanged();
 
 };
 

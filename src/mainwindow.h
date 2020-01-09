@@ -83,8 +83,8 @@ private:
         return QFileInfo(fullFileName).fileName();
     }
 
-    NodeStyle normalNodeStyle_;
-    NodeStyle dockedNodeStyle_;
+    QColor normalNodeColor_;
+    QColor dockedNodeColor_;
 
     void setStyles();
 

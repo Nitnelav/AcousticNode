@@ -19,8 +19,8 @@ export const outputs = [
 
 const alpha200 = [1, 1, 1, 1, 3, 3, 3, 3]; // extrapolation : 8kHz = 4kHz
 const alpha400 = [0.5, 1, 1, 1, 2, 2, 2, 2]; // extrapolation : 8kHz = 4kHz
-const alpha800 = [0.3, 0.6, 0.6, 1, 1, 1, 1]; // extrapolation : 8kHz = 4kHz
-const alpha1600 = [0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.5]; // extrapolation : 8kHz = 4kHz
+const alpha800 = [0.3, 0.6, 0.6, 1, 1, 1, 1, 1]; // extrapolation : 8kHz = 4kHz
+const alpha1600 = [0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.5, 0.5]; // extrapolation : 8kHz = 4kHz
 
 export function calculate (inputs, parameters) {
     var outputs = {};

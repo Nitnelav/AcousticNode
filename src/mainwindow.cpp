@@ -161,6 +161,10 @@ void MainWindow::nodeCreated(Node &node)
     selectedNode_ = &node;
     ui_->dockWidget->setWidget(nodeModel->getDockWidget());
     nodeModel->getDockWidget()->show();
+    connect(nodeModel, &ScriptWrapperModel::captionChanged, [&](){
+        node.nodeGraphicsObject().setFocus();
+        node.nodeGraphicsObject().clearFocus();
+    });
 }
 
 void MainWindow::nodeDeleted(Node &node)
@@ -222,7 +226,9 @@ void MainWindow::nodeContextMenu(Node &n, const QPointF &pos)
         } else {
             tabifyDockWidget(nodeDocks_.last(), newDock);
         }
-        nodeModel->setNodeStyle(dockedNodeStyle_);
+        NodeStyle style = nodeModel->nodeStyle();
+        style.NormalBoundaryColor = dockedNodeColor_;
+        nodeModel->setNodeStyle(style);
         nodeDocks_[node->id()] = newDock;
     });
     menu->popup(ui_->flowView->mapToGlobal(ui_->flowView->mapFromScene(pos)));
@@ -276,7 +282,9 @@ void MainWindow::dockClosed(QUuid nodeId)
     auto nodes = flowScene_->allNodes();
     flowScene_->iterateOverNodes([=](Node* node) {
         if (node->id() == nodeId) {
-            node->nodeDataModel()->setNodeStyle(normalNodeStyle_);
+            NodeStyle style = node->nodeDataModel()->nodeStyle();
+            style.NormalBoundaryColor = normalNodeColor_;
+            node->nodeDataModel()->setNodeStyle(style);
             node->nodeGraphicsObject().update();
         }
     });
@@ -583,57 +591,7 @@ void MainWindow::setStyles()
     }
     )");
 
-    normalNodeStyle_ = NodeStyle(R"(
-    {
-        "NodeStyle": {
-         "NormalBoundaryColor": [255, 255, 255],
-         "SelectedBoundaryColor": [255, 165, 0],
-         "GradientColor0": "gray",
-         "GradientColor1": [80, 80, 80],
-         "GradientColor2": [64, 64, 64],
-         "GradientColor3": [58, 58, 58],
-         "ShadowColor": [20, 20, 20],
-         "FontColor" : "white",
-         "FontColorFaded" : "gray",
-         "ConnectionPointColor": [169, 169, 169],
-         "FilledConnectionPointColor": "cyan",
-         "ErrorColor": "red",
-         "WarningColor": [128, 128, 0],
+    normalNodeColor_ = QColor("#FFA800");
+    dockedNodeColor_ = QColor("#c13ed6").lighter(200); //#773C6D //#932d82
 
-         "PenWidth": 1.0,
-         "HoveredPenWidth": 1.5,
-
-         "ConnectionPointDiameter": 8.0,
-
-         "Opacity": 0.8
-        }
-    }
-    )");
-
-    dockedNodeStyle_ = NodeStyle(R"(
-    {
-        "NodeStyle": {
-         "NormalBoundaryColor": [0, 255, 255],
-         "SelectedBoundaryColor": [255, 165, 0],
-         "GradientColor0": "gray",
-         "GradientColor1": [80, 80, 80],
-         "GradientColor2": [64, 64, 64],
-         "GradientColor3": [58, 58, 58],
-         "ShadowColor": [20, 20, 20],
-         "FontColor" : "white",
-         "FontColorFaded" : "gray",
-         "ConnectionPointColor": [169, 169, 169],
-         "FilledConnectionPointColor": "cyan",
-         "ErrorColor": "red",
-         "WarningColor": [128, 128, 0],
-
-         "PenWidth": 1.0,
-         "HoveredPenWidth": 1.5,
-
-         "ConnectionPointDiameter": 8.0,
-
-         "Opacity": 0.8
-        }
-    }
-    )");
 }

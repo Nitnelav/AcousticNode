@@ -1,5 +1,7 @@
 #include "scriptwrappermodel.h"
 
+#include <QDebug>
+
 ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString path):
     js_(engine),
     db_(db),
@@ -192,7 +194,8 @@ ScriptWrapperModel::~ScriptWrapperModel()
 
 void ScriptWrapperModel::setCaption(const QString &caption)
 {
-     caption_ = caption;
+    caption_ = caption;
+    Q_EMIT captionChanged();
 }
 
 QString ScriptWrapperModel::caption() const
@@ -287,6 +290,12 @@ void ScriptWrapperModel::setInData(std::shared_ptr<QtNodes::NodeData> data, QtNo
             }
             validationState_ = NodeValidationState::Warning;
             validationMessage_ = QString("Missing or invalid inputs");
+            NodeStyle currentStyle = nodeStyle();
+            currentStyle.GradientColor0 = QColor("gray");
+            currentStyle.GradientColor1 = QColor("#505050");
+            currentStyle.GradientColor2 = QColor("#404040");
+            currentStyle.GradientColor3 = QColor("#3A3A3A");
+            setNodeStyle(currentStyle);
         } else {
             inputArgs_.setProperty(id, QJSValue::UndefinedValue);
             calculate();
@@ -542,6 +551,17 @@ void ScriptWrapperModel::calculate()
         }
         Q_EMIT dataUpdated(index);
     }
+
+    if (result.hasProperty("color") && QColor::isValidColor(result.property("color").toString())) {
+        QColor color(result.property("color").toString());
+        NodeStyle currentStyle = nodeStyle();
+        currentStyle.GradientColor0 = color;
+        currentStyle.GradientColor1 = color.darker(150);
+        currentStyle.GradientColor2 = color.darker(200);
+        currentStyle.GradientColor3 = color.darker(250);
+        setNodeStyle(currentStyle);
+    }
+
     js_->collectGarbage();
 }
 
