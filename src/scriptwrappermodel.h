@@ -62,6 +62,7 @@ private:
 
     QList<std::shared_ptr<ModuleData> > inputs_;
     QList<std::shared_ptr<ModuleData> > parameters_;
+    QList<std::shared_ptr<ModuleData> > roOutputs_;
     QList<std::shared_ptr<ModuleData> > outputs_;
 
     ModuleGraph* moduleChart_;
@@ -74,6 +75,9 @@ private:
     QJSValue parametersDefinition_;
     int numParameters_;
     QJSValue parameterArgs_;
+
+    QJSValue roOutputsDefinition_;
+    int numRoOutputs_;
 
     QJSValue outputsDefinition_;
     int numOutputs_;

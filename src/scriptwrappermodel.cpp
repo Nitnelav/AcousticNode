@@ -37,6 +37,9 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
     if (!module_.hasProperty("parameters") || !module_.property("parameters").isArray()) {
         throw MissingOrBadPropertyError(path.toLatin1(), "parameters");
     }
+    if (!module_.hasProperty("readonly_outputs") || !module_.property("readonly_outputs").isArray()) {
+        throw MissingOrBadPropertyError(path.toLatin1(), "readonly_outputs");
+    }
     if (!module_.hasProperty("outputs") || !module_.property("outputs").isArray()) {
         throw MissingOrBadPropertyError(path.toLatin1(), "outputs");
     }
@@ -111,7 +114,7 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
             }
             connect(integerModuleData.get(), &IntegerModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
             parameters_.append(integerModuleData);
-            parameterArgs_.setProperty(integerModuleData->id(), integerData->number());
+            parameterArgs_.setProperty(integerModuleData->id(), integerModuleData->getValue());
         } else if (type == "bool") {
             auto booleanModuleData = std::make_shared<BooleanModuleData>(element);
             auto booleanData = std::make_shared<BooleanData>();
@@ -121,7 +124,7 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
             }
             connect(booleanModuleData.get(), &BooleanModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
             parameters_.append(booleanModuleData);
-            parameterArgs_.setProperty(booleanModuleData->id(), booleanData->boolean());
+            parameterArgs_.setProperty(booleanModuleData->id(), booleanModuleData->getValue());
         } else if (type == "float") {
             auto floatModuleData = std::make_shared<FloatModuleData>(element);
             auto floatData = std::make_shared<FloatData>();
@@ -131,7 +134,7 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
             }
             connect(floatModuleData.get(), &FloatModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
             parameters_.append(floatModuleData);
-            parameterArgs_.setProperty(floatModuleData->id(), floatData->number());
+            parameterArgs_.setProperty(floatModuleData->id(), floatModuleData->getValue());
         } else if (type == "choice") {
             auto choiceModuleData = std::make_shared<ChoiceModuleData>(element);
             auto choiceData = std::make_shared<ChoiceData>();
@@ -152,9 +155,28 @@ ScriptWrapperModel::ScriptWrapperModel(QJSEngine *engine, DbManager* db, QString
             }
             connect(choiceModuleData.get(), &ChoiceModuleData::widgetDataChanged, this, &ScriptWrapperModel::parameterChanged);
             parameters_.append(choiceModuleData);
-            parameterArgs_.setProperty(choiceModuleData->id(), choiceData->string());
+            parameterArgs_.setProperty(choiceModuleData->id(), choiceModuleData->getString());
         } else {
             parameters_.append(nullptr);
+        }
+    }
+
+    roOutputsDefinition_ = module_.property("readonly_outputs");
+    numRoOutputs_ = roOutputsDefinition_.property("length").toInt();
+    for (int index = 0; index < numRoOutputs_; ++index) {
+        QJSValue element = roOutputsDefinition_.property(index);
+        QString type = element.property("type").toString();
+        if (type == "spectrum") {
+            auto spectrumData = std::make_shared<SpectrumModuleData>(element);
+            roOutputs_.append(spectrumData);
+        } else if (type == "int") {
+            roOutputs_.append(std::make_shared<IntegerModuleData>(element));
+        } else if (type == "bool") {
+            roOutputs_.append(std::make_shared<BooleanModuleData>(element));
+        } else if (type == "float") {
+            roOutputs_.append(std::make_shared<FloatModuleData>(element));
+        } else {
+            roOutputs_.append(nullptr);
         }
     }
 
@@ -416,6 +438,20 @@ void ScriptWrapperModel::setupDockWidget()
         }
     }
 
+    if (numRoOutputs_ > 0) {
+        QGroupBox* roOutputGroup = new QGroupBox("Readonly Outputs");
+        QFormLayout* roOutputLayout = new QFormLayout();
+        roOutputLayout->setRowWrapPolicy(QFormLayout::WrapAllRows);
+        roOutputGroup->setLayout(roOutputLayout);
+        dataLayout->addWidget(roOutputGroup);
+        for (int index = 0; index < numRoOutputs_; ++index) {
+            QWidget* widget = roOutputs_[index]->getWidget();
+            roOutputLayout->addRow(roOutputs_[index]->description(), widget);
+            widget->setDisabled(true);
+            widget->show();
+        }
+    }
+
     if (numOutputs_ > 0) {
         QGroupBox* outputGroup = new QGroupBox("Outputs");
         QFormLayout* outputLayout = new QFormLayout();
@@ -470,6 +506,84 @@ void ScriptWrapperModel::calculate()
         validationState_ = NodeValidationState::Error;
         validationMessage_ = QString("Script output is not an object");
         return;
+    }
+
+    for (int index = 0; index < numRoOutputs_; index++) {
+        QString type = roOutputs_[index]->type();
+        QString id = roOutputs_[index]->id();
+        if (!result.hasProperty(id)) {
+            roOutputs_[index]->setNodeData(nullptr);
+            continue;
+        }
+        if (type == "spectrum") {
+            if (!result.property(id).isArray()) {
+                validationState_ = NodeValidationState::Error;
+                validationMessage_ = QString("Script output '%1' is not an array (spectrum)").arg(id);
+                return;
+            }
+            if (result.property(id).property("length").toInt() != 8) {
+                validationState_ = NodeValidationState::Error;
+                validationMessage_ = QString("Script output '%1' must be an array of size 8 (spectrum)").arg(id);
+                return;
+            }
+            std::shared_ptr<SpectrumData> outputData;
+            auto ouput = std::dynamic_pointer_cast<SpectrumModuleData>(roOutputs_[index]);
+            if (ouput->getNodeData()) {
+                outputData = std::static_pointer_cast<SpectrumData>(ouput->getNodeData());
+            } else {
+                outputData = std::make_shared<SpectrumData>();
+                ouput->setNodeData(outputData);
+                moduleChart_->appendSpectrumData(ouput);
+            }
+            for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; ++freq) {
+                ouput->setValue(freq, result.property(id).property(freq).toNumber());
+            }
+        } else if (type == "int") {
+            if (!result.property(id).isNumber()) {
+                validationState_ = NodeValidationState::Error;
+                validationMessage_ = QString("Script output '%1' is not an number (int)").arg(id);
+                return;
+            }
+            std::shared_ptr<IntegerData> outputData;
+            auto ouput = std::dynamic_pointer_cast<IntegerModuleData>(roOutputs_[index]);
+            if (ouput->getNodeData()) {
+                outputData = std::static_pointer_cast<IntegerData>(ouput->getNodeData());
+            } else {
+                outputData = std::make_shared<IntegerData>();
+                ouput->setNodeData(outputData);
+            }
+            ouput->setValue(result.property(id).toNumber());
+        } else if (type == "bool") {
+            if (!result.property(id).isBool()) {
+                validationState_ = NodeValidationState::Error;
+                validationMessage_ = QString("Script output '%1' is not an boolean (bool)").arg(id);
+                return;
+            }
+            std::shared_ptr<BooleanData> outputData;
+            auto ouput = std::dynamic_pointer_cast<BooleanModuleData>(roOutputs_[index]);
+            if (ouput->getNodeData()) {
+                outputData = std::static_pointer_cast<BooleanData>(ouput->getNodeData());
+            } else {
+                outputData = std::make_shared<BooleanData>();
+                ouput->setNodeData(outputData);
+            }
+            ouput->setValue(result.property(id).toBool());
+        } else if (type == "float") {
+            if (!result.property(id).isNumber()) {
+                validationState_ = NodeValidationState::Error;
+                validationMessage_ = QString("Script output '%1' is not an number (float)").arg(id);
+                return;
+            }
+            std::shared_ptr<FloatData> outputData;
+            auto ouput = std::dynamic_pointer_cast<FloatModuleData>(roOutputs_[index]);
+            if (ouput->getNodeData()) {
+                outputData = std::static_pointer_cast<FloatData>(ouput->getNodeData());
+            } else {
+                outputData = std::make_shared<FloatData>();
+                ouput->setNodeData(outputData);
+            }
+            ouput->setValue(result.property(id).toNumber());
+        }
     }
 
     for (int index = 0; index < numOutputs_; index++) {

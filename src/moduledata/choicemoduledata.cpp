@@ -17,7 +17,8 @@ ChoiceModuleData::ChoiceModuleData(const QJSValue& element):
         }
         if (element.property("default").isString()) {
             QString string = element.property("default").toString();
-            if (int index = choiceList_.indexOf(string) >= 0) {
+            int index = choiceList_.indexOf(string);
+            if (index >= 0) {
                 default_ = index;
             }
         }
