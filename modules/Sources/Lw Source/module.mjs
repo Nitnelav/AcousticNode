@@ -10,13 +10,16 @@ export const parameters = [
     { id: "param1", type: 'spectrum', typeName: "Lw", description: 'Output Lw'},
 ];
 
+export const readonly_outputs = [
+];
+
 export const outputs = [
     { id: "out1", type: 'spectrum', typeName: "Lw", description: 'Output Lw' },
 ];
 
 export function calculate (inputs, parameters) {
-    var outputs = {};
-    outputs["out1"] = parameters["param1"];
-    return outputs;
+    return {
+        "out1": parameters["param1"]
+    };
 };
 

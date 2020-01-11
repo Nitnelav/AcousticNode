@@ -11,18 +11,21 @@ export const parameters = [
     { id: "choice", type: 'choice', typeName: "Choice", description: 'Add or Substract', choices: ["add", "substract"], default: "add"},
 ];
 
+export const readonly_outputs = [
+];
+
 export const outputs = [
     { id: "out1", type: 'spectrum', typeName: "Lp", description: 'Output Lp' },
 ];
 
 export function calculate (inputs, parameters) {
-    var outputs = {};
-    var outputLp = [];
+    var output = [];
     var addOrSub = parameters["choice"] === "add" ? 1 : -1;
     for (let freq = 0; freq < 8; freq++) {
-        outputLp[freq] = inputs["in1"][freq] + addOrSub * parameters["correction"][freq];
+        output[freq] = inputs["in1"][freq] + addOrSub * parameters["correction"][freq];
     }
-    outputs["out1"] = outputLp;
-    return outputs;
+    return {
+        "out1": output
+    };
 };
 

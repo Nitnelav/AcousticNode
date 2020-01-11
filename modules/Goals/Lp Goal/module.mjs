@@ -10,11 +10,13 @@ export const parameters = [
     { id: "goal", type: 'spectrum', typeName: "Lp", description: 'Lp Goal'},
 ];
 
+export const readonly_outputs = [
+];
+
 export const outputs = [
 ];
 
 export function calculate (inputs, parameters) {
-    var outputs = {};
     const success = "#00FF00";
     const fail = "#FF0000";
     var ok = true;
@@ -23,7 +25,8 @@ export function calculate (inputs, parameters) {
             ok = false;
         }
     }
-    outputs["color"] = ok ? success : fail;
-    return outputs;
+    return {
+        "color": ok ? success : fail
+    };
 };
 
