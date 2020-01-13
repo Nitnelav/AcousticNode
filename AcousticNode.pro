@@ -37,6 +37,7 @@ include(./externals/QXlsx/QXlsx.pri)
 SOURCES += \
     externals/nodeeditor/src/NodeGroup.cpp \
     externals/nodeeditor/src/NodeGroupGraphicsObject.cpp \
+    src/dbeditdialog.cpp \
     src/dbpathdialog.cpp \
     src/excelexporter.cpp \
     src/main.cpp \
@@ -78,6 +79,7 @@ SOURCES += \
 HEADERS += \
     externals/nodeeditor/src/NodeGroup.hpp \
     externals/nodeeditor/src/NodeGroupGraphicsObject.hpp \
+    src/dbeditdialog.h \
     src/dbpathdialog.h \
     src/excelexporter.h \
     src/mainwindow.h \
@@ -151,7 +153,6 @@ HEADERS += \
     src/moduledata/choicedata.h
 
 FORMS += \
-    src/dbpath.ui \
         src/mainwindow.ui \
     src/dbsearch.ui
 

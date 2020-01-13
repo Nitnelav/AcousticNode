@@ -102,6 +102,10 @@ MainWindow::MainWindow(QWidget *parent) :
         DbPathDialog* dlg = new DbPathDialog(dbMgr_);
         dlg->exec();
     });
+    connect(ui_->actionDBAdd, &QAction::triggered, [=]() {
+        DbEditDialog* dlg = new DbEditDialog(dbMgr_);
+        dlg->exec();
+    });
     connect(ui_->actionModulesSetPaths, &QAction::triggered, [=]() {
         ModulePathDialog* dlg = new ModulePathDialog(moduleMgr_);
         dlg->exec();

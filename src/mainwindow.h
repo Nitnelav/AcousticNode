@@ -35,6 +35,7 @@
 #include "modulemanager.h"
 #include "dbmanager.h"
 #include "dbpathdialog.h"
+#include "dbeditdialog.h"
 #include "modulepathdialog.h"
 #include "modulegraph.h"
 #include "excelexporter.h"

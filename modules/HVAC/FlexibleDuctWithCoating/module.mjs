@@ -15,6 +15,7 @@ export const parameters = [
 ];
 
 export const readonly_outputs = [
+    { id: "attenuation", type: 'spectrum', typeName: "Lw", description: 'Attenuation' },
 ];
 
 export const outputs = [
@@ -105,7 +106,8 @@ export function calculate (inputs, parameters) {
         output[freq] = inputs["in1"][freq] - attenuation[thickness][length][diameter][freq];
     }
     return {
-        "Lw": output
+        "Lw": output,
+        "attenuation": attenuation[thickness][length][diameter]
     };
 };
 

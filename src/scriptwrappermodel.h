@@ -11,6 +11,7 @@
 #include <QJSValueIterator>
 #include <QChartView>
 #include <QMenu>
+#include <QScrollArea>
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QLineEdit>

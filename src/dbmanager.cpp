@@ -1,15 +1,23 @@
 #include "dbmanager.h"
 
+#include "dbeditdialog.h"
+#include "dbpathdialog.h"
+
+#include <QDebug>
+#include <QSqlError>
+
 DbManager::DbManager() : QObject(nullptr),
     searchDialog_(new QDialog),
     searchDialogUi_(new Ui::DbSearchDialog)
 {
     searchDialogUi_->setupUi(searchDialog_);
     searchDialogUi_->tableView->resizeColumnsToContents();
+    searchDialogUi_->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(searchDialogUi_->dbListCombo, &QComboBox::currentTextChanged, this, &DbManager::changeDb);
     connect(searchDialogUi_->dbTableCombo, &QComboBox::currentTextChanged, this, &DbManager::changeTable);
     connect(searchDialogUi_->searchFilter, &QLineEdit::textChanged, this, &DbManager::changeFilter);
+    connect(searchDialogUi_->tableView, &QTableView::customContextMenuRequested, this, &DbManager::tableContextMenu);
 }
 
 DbManager::~DbManager()
@@ -21,6 +29,12 @@ DbManager::~DbManager()
 QStringList DbManager::dbList() const
 {
     return QSqlDatabase::connectionNames();
+}
+
+QStringList DbManager::tableList() const
+{
+    QSqlDatabase db = QSqlDatabase::database(currentDbName_);
+    return db.tables();
 }
 
 void DbManager::addDb(const QString &filePath, const QString &name)
@@ -132,10 +146,11 @@ void DbManager::changeDb(const QString &dbName)
 
 void DbManager::changeTable(const QString &tableName)
 {
+    currentTable_ = tableName;
     QSqlDatabase db = QSqlDatabase::database(currentDbName_);
     searchDialogUi_->tableView->model()->deleteLater();
     QSqlQueryModel* model = new QSqlQueryModel();
-    QString query = QString("SELECT name, val63Hz as '63Hz', val125Hz as '125Hz', val250Hz as '250Hz', val500Hz as '500Hz', val1kHz as '1kHz', val2kHz as '2kHz', val4kHz as '4kHz', val8kHz as '8kHz', comment FROM %1");
+    QString query = QString("SELECT id, name, val63Hz as '63Hz', val125Hz as '125Hz', val250Hz as '250Hz', val500Hz as '500Hz', val1kHz as '1kHz', val2kHz as '2kHz', val4kHz as '4kHz', val8kHz as '8kHz', comment FROM %1");
     model->setQuery(query.arg(tableName), db);
     searchDialogUi_->tableView->setModel(model);
     searchDialogUi_->tableView->resizeColumnsToContents();
@@ -151,15 +166,124 @@ void DbManager::changeFilter(const QString &filter)
     if (!filter.isEmpty()) {
         query = QString(
             R"(
-                SELECT name, val63Hz as '63Hz', val125Hz as '125Hz', val250Hz as '250Hz', val500Hz as '500Hz', val1kHz as '1kHz', val2kHz as '2kHz', val4kHz as '4kHz', val8kHz as '8kHz', comment
+                SELECT id, name, val63Hz as '63Hz', val125Hz as '125Hz', val250Hz as '250Hz', val500Hz as '500Hz', val1kHz as '1kHz', val2kHz as '2kHz', val4kHz as '4kHz', val8kHz as '8kHz', comment
                 FROM %1
                 WHERE name LIKE '%%2%'
             )").arg(searchDialogUi_->dbTableCombo->currentText()).arg(filter);
     } else {
-        query = QString("SELECT name, val63Hz as '63Hz', val125Hz as '125Hz', val250Hz as '250Hz', val500Hz as '500Hz', val1kHz as '1kHz', val2kHz as '2kHz', val4kHz as '4kHz', val8kHz as '8kHz', comment FROM %1")
+        query = QString("SELECT id, name, val63Hz as '63Hz', val125Hz as '125Hz', val250Hz as '250Hz', val500Hz as '500Hz', val1kHz as '1kHz', val2kHz as '2kHz', val4kHz as '4kHz', val8kHz as '8kHz', comment FROM %1")
                 .arg(searchDialogUi_->dbTableCombo->currentText());
     }
     model->setQuery(query, db);
     searchDialogUi_->tableView->setModel(model);
     searchDialogUi_->tableView->resizeColumnsToContents();
+}
+
+void DbManager::tableContextMenu(const QPoint &pos)
+{
+    int index = searchDialogUi_->tableView->rowAt(pos.y());
+    if (index < 0) {
+        return;
+    }
+    QSqlQueryModel* model = (QSqlQueryModel*) searchDialogUi_->tableView->model();
+    QMenu* menu = new QMenu();
+    QAction* action = menu->addAction("Edit...");
+    connect(action, &QAction::triggered, [=]() {
+        DbEditDialog* editDlg = new DbEditDialog(this, model->record(index));
+        editDlg->open();
+        connect(editDlg, &QDialog::finished, this, &DbManager::updateData);
+    });
+
+    menu->popup(searchDialogUi_->tableView->mapToGlobal(pos));
+    connect(menu, &QMenu::aboutToHide, menu, &QMenu::deleteLater);
+}
+
+void DbManager::updateData()
+{
+    changeFilter(searchDialogUi_->searchFilter->text());
+}
+
+QString DbManager::getCurrentDbName() const
+{
+    return currentDbName_;
+}
+
+QString DbManager::getCurrentTable() const
+{
+    return currentTable_;
+}
+
+void DbManager::updateElement(QString db, QString table, QString id, QString name, QStringList spectrum, QString comment)
+{
+    if (!dbList().contains(db)) {
+        return;
+    }
+    QSqlDatabase database = QSqlDatabase::database(currentDbName_);
+    if (!database.tables().contains(table)) {
+        return;
+    }
+    QString query = QString(R"(
+                   UPDATE %1
+                   SET name = '%2', val63Hz = %3, val125Hz = %4, val250Hz = %5, val500Hz = %6, val1kHz = %7, val2kHz = %8, val4kHz = %9, val8kHz = %10, comment = '%11'
+                   WHERE id = %12
+               )").arg(table);
+    query = query.arg(name);
+    for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; freq++)
+    {
+        query = query.arg(spectrum[freq].replace(",", "."));
+    }
+    query = query.arg(comment);
+    query = query.arg(id);
+
+    QSqlQuery result = database.exec(query);
+    if (!result.isActive()) {
+        qDebug() << database.lastError();
+        return;
+    }
+}
+
+void DbManager::addElement(QString db, QString table, QString name, QStringList spectrum, QString comment)
+{
+    if (!dbList().contains(db)) {
+        return;
+    }
+    QSqlDatabase database = QSqlDatabase::database(currentDbName_);
+    if (!database.tables().contains(table)) {
+        QString query = QString(R"(
+                       CREATE TABLE %1 (
+                       id       INTEGER       PRIMARY KEY,
+                       name     VARCHAR (255),
+                       val63Hz  DOUBLE,
+                       val125Hz DOUBLE,
+                       val250Hz DOUBLE,
+                       val500Hz DOUBLE,
+                       val1kHz  DOUBLE,
+                       val2kHz  DOUBLE,
+                       val4kHz  DOUBLE,
+                       val8kHz  DOUBLE,
+                       comment  VARCHAR (255)
+                       );
+                   )").arg(table);
+        QSqlQuery result = database.exec(query);
+        if (!result.isActive()) {
+            qDebug() << database.lastError();
+            return;
+        }
+    }
+    QString query = QString(R"(
+                   INSERT INTO %1 (name, val63Hz, val125Hz, val250Hz, val500Hz, val1kHz, val2kHz, val4kHz, val8kHz, comment)
+                   VALUES ('%2', %3, %4, %5, %6, %7, %8, %9, %10, '%11')
+               )").arg(table);
+    query = query.arg(name);
+    for (int freq = FREQ_63Hz; freq <= FREQ_8kHz; freq++)
+    {
+        query = query.arg(spectrum[freq].replace(",", "."));
+    }
+    query = query.arg(comment);
+
+    QSqlQuery result = database.exec(query);
+    if (!result.isActive()) {
+        qDebug() << database.lastError();
+        return;
+    }
 }

@@ -16,8 +16,8 @@ ModuleData::ModuleData(const QJSValue& element) : QObject(nullptr)
 QString ModuleData::caption() const
 {
     if (required_) {
-        return typeName_;
+        return description_;
     } else {
-        return typeName_ + '*';
+        return description_ + '*';
     }
 }

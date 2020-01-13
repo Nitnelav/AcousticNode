@@ -366,7 +366,10 @@ void ScriptWrapperModel::setupDockWidget()
 
     QTabWidget* tabWidget = new QTabWidget();
 
-    QFrame* infoFrame = new QFrame();
+    QScrollArea* infoScrollArea = new QScrollArea();
+    infoScrollArea->setWidgetResizable(true);
+    QWidget* infoFrame = new QWidget();
+    infoScrollArea->setWidget(infoFrame);
     QFormLayout* infoLayout = new QFormLayout();
     infoLayout->setRowWrapPolicy(QFormLayout::WrapAllRows);
     infoFrame->setLayout(infoLayout);
@@ -403,7 +406,10 @@ void ScriptWrapperModel::setupDockWidget()
     }
 
 
-    QFrame* dataFrame = new QFrame();
+    QScrollArea* dataScrollArea = new QScrollArea();
+    dataScrollArea->setWidgetResizable(true);
+    QWidget* dataFrame = new QWidget();
+    dataScrollArea->setWidget(dataFrame);
     QVBoxLayout* dataLayout = new QVBoxLayout();
     dataFrame->setLayout(dataLayout);
 
@@ -473,8 +479,8 @@ void ScriptWrapperModel::setupDockWidget()
     moduleChartView_->setChart(moduleChart_);
     connect(moduleChartView_, &QChartView::customContextMenuRequested, this, &ScriptWrapperModel::graphContextMenu);
 
-    tabWidget->addTab(infoFrame, "Info");
-    tabWidget->addTab(dataFrame, "Parameters");
+    tabWidget->addTab(infoScrollArea, "Info");
+    tabWidget->addTab(dataScrollArea, "Parameters");
     tabWidget->addTab(moduleChartView_, "Graph");
 
     mainLayout->addWidget(tabWidget);

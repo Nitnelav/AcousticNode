@@ -106,6 +106,7 @@
     <addaction name="actionDBSetPaths"/>
     <addaction name="separator"/>
     <addaction name="actionDBBrowse"/>
+    <addaction name="actionDBAdd"/>
    </widget>
    <widget class="QMenu" name="menuModules">
     <property name="title">
@@ -215,6 +216,7 @@
    <addaction name="separator"/>
    <addaction name="actionDBSetPaths"/>
    <addaction name="actionDBBrowse"/>
+   <addaction name="actionDBAdd"/>
   </widget>
   <action name="actionNewProject">
    <property name="icon">
@@ -275,21 +277,6 @@
     <bool>true</bool>
    </property>
   </action>
-  <action name="actionDBSettings">
-   <property name="text">
-    <string>Settings...</string>
-   </property>
-  </action>
-  <action name="actionDBAddCategory">
-   <property name="text">
-    <string>Add Category...</string>
-   </property>
-  </action>
-  <action name="actionDBAddElement">
-   <property name="text">
-    <string>Add Element...</string>
-   </property>
-  </action>
   <action name="actionDBBrowse">
    <property name="icon">
     <iconset resource="../resources/resources.qrc">
@@ -334,6 +321,15 @@
    </property>
    <property name="text">
     <string>Add Node</string>
+   </property>
+  </action>
+  <action name="actionDBAdd">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/_icons/database-add.png</normaloff>:/_icons/database-add.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add element...</string>
    </property>
   </action>
  </widget>

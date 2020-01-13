@@ -7,7 +7,7 @@ export const inputs = [
 ];
 
 export const parameters = [
-    { id: "param1", type: 'spectrum', typeName: "Lw", description: 'Output Lw'},
+    { id: "param1", type: 'spectrum', typeName: "Lw", description: 'Output Lw', default: [100, 100, 100, 100, 100, 100, 100, 100]},
 ];
 
 export const readonly_outputs = [
