@@ -24,15 +24,18 @@ bool ExcelExporter::exportScene(QtNodes::FlowScene *scene, QString fileName)
     {
         QJsonObject nodeRoot = node.toObject();
         QJsonObject nodeModel = nodeRoot["model"].toObject();
+        QUuid id(nodeRoot["id"].toString());
 
-        xlsx.addSheet(QString::number(nodeIndex) + "_" + nodeModel["name"].toString());
+        xlsx.addSheet(id.toString(QUuid::WithoutBraces));
+//        xlsx.addSheet(QString::number(nodeIndex) + "_" + nodeModel["name"].toString());
+
         Worksheet *sheet = xlsx.currentWorksheet();
 
         row = 1;
         col = 1;
         sheet->write(CellReference(row, col), "id");
         col++;
-        sheet->write(CellReference(row, col), nodeRoot["id"].toString());
+        sheet->write(CellReference(row, col), id.toString(QUuid::WithoutBraces));
 
         row++;
         col = 1;
@@ -46,7 +49,7 @@ bool ExcelExporter::exportScene(QtNodes::FlowScene *scene, QString fileName)
         col++;
         sheet->write(CellReference(row, col), nodeModel["description"].toString());
 
-        for (QString group: {"inputs", "parameters", "outputs"}) {
+        for (QString group: {"inputs", "parameters", "readonly_outputs", "outputs"}) {
 
             row += 2;
             col = 1;

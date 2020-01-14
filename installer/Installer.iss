@@ -7,8 +7,8 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{D8519514-368A-459B-A142-8A874D9EF352}
 AppName=AcousticNode
-AppVersion=0.1.0
-;AppVerName=AcousticNode 0.1.0
+AppVersion=0.2.0
+;AppVerName=AcousticNode 0.2.0
 AppPublisher=Valentin LE BESCOND
 AppPublisherURL=https://github.com/Nitnelav/AcousticNode
 AppSupportURL=https://github.com/Nitnelav/AcousticNode
@@ -28,10 +28,10 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "..\..\build--Desktop_Qt_5_12_1_MinGW_64_bit-Release\install\AcousticNode.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\..\build--Desktop_Qt_5_12_1_MinGW_64_bit-Release\install\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\_builds\build-AcousticNode-Desktop_Qt_5_12_1_MinGW_64_bit-Release\release\AcousticNode.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\_builds\build-AcousticNode-Desktop_Qt_5_12_1_MinGW_64_bit-Release\install\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\modules\*"; DestDir: "{app}\modules"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\database.db"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\database.db"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

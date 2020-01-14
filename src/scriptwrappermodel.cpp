@@ -780,6 +780,40 @@ QJsonObject ScriptWrapperModel::save() const
 
     modelJson["parameters"] = parametersJson;
 
+    QJsonObject roOutputsJson;
+
+    for (int index = 0; index < numRoOutputs_; ++index) {
+        QJsonObject output;
+        QString type = roOutputs_[index]->type();
+        QString id = roOutputs_[index]->id();
+        output["type"] = type;
+        output["typeName"] = roOutputs_[index]->typeName();
+        output["description"] = roOutputs_[index]->description();
+        if (type == "spectrum") {
+            QJsonArray array;
+            auto outputData = std::static_pointer_cast<SpectrumModuleData>(roOutputs_[index]);
+            for (int freq = 0; freq < 8; ++freq) {
+                array.append(outputData->getValue(freq));
+            }
+            output["data"] = array;
+        } else if (type == "int") {
+            auto outputData = std::static_pointer_cast<IntegerModuleData>(roOutputs_[index]);
+            output["data"] = outputData->getValue();
+        } else if (type == "bool") {
+            auto outputData = std::static_pointer_cast<BooleanModuleData>(roOutputs_[index]);
+            output["data"] = outputData->getValue();
+        } else if (type == "float") {
+            auto outputData = std::static_pointer_cast<FloatModuleData>(roOutputs_[index]);
+            output["data"] = outputData->getValue();
+        } else if (type == "choice") {
+            auto outputData = std::static_pointer_cast<ChoiceModuleData>(roOutputs_[index]);
+            output["data"] = outputData->getString();
+        }
+        roOutputsJson[id] = output;
+    }
+
+    modelJson["readonly_outputs"] = roOutputsJson;
+
     QJsonObject outputsJson;
 
     for (int index = 0; index < numOutputs_; ++index) {

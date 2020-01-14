@@ -67,6 +67,8 @@ private:
     ModuleManager* moduleMgr_;
     DbManager* dbMgr_;
 
+    QStringList nodeNames_;
+
     Node* selectedNode_;
     Node* lockedNode_;
 

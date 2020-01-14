@@ -25,11 +25,11 @@ export function calculate (inputs, parameters) {
     if (inputs["in2"]) {
         inputList.push(inputs["in2"])
     }
-    var outputLp = [-99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0 ];
+    var output = [-99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0 ];
 
     for (let freq = 0; freq < 8; freq++) {
         inputList.forEach(input => {
-            outputLp[freq] = 10 * Math.log10(Math.pow(10, outputLp[freq] / 10) + Math.pow(10, input[freq] / 10));
+            output[freq] = 10 * Math.log10(Math.pow(10, output[freq] / 10) + Math.pow(10, input[freq] / 10));
         });
     }
     return {

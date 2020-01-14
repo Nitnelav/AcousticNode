@@ -7,6 +7,8 @@
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
 
+#include <QUuid>
+
 // [0] include QXlsx headers
 #include "xlsxdocument.h"
 #include "xlsxchartsheet.h"
