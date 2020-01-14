@@ -32,6 +32,7 @@ Source: "..\..\_builds\build-AcousticNode-Desktop_Qt_5_12_1_MinGW_64_bit-Release
 Source: "..\..\_builds\build-AcousticNode-Desktop_Qt_5_12_1_MinGW_64_bit-Release\install\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\modules\*"; DestDir: "{app}\modules"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\database.db"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\config.ini"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
