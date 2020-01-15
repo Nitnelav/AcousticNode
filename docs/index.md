@@ -1,29 +1,32 @@
+# AcousticNode
 
-# Chain modules
+A flow-based calculator for Acoustic Engineers
+
+## Chain modules
 
 Connect a chain of modules together and get the result !
 
 ![capture_chain](./images/capture_chain.png)
 
-# Set the modules parameters
+## Set the modules parameters
 
 Every modules can have as many options as you want.
 
 ![capture_parameters](./images/capture_parameters.png)
 
-# Graph everything
+## Graph everything
 
 Every spectrum is automatically graphed.
 
 ![capture_graph](./images/capture_graph.png)
 
-# Integrated Database
+## Integrated Database
 
 Connect one or more SQLite databases and use thoses spectrums in your projects.
 
 ![capture_database](./images/capture_database.png)
 
-# Create your own modules
+## Create your own modules
 
 Modules are created in simple `module.mjs` javascript files. You can create your own in minutes :
 
